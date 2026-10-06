@@ -1,0 +1,19 @@
+{
+  "categorias": [
+    {
+      "id": "cat1",
+      "nombre": "Identificación",
+      "icono": "id_card"
+    }
+  ],
+  "tramites": [
+    {
+      "id": "ced1",
+      "categoriaId": "cat1",
+      "titulo": "Cédula (Primera Vez)",
+      "descripcion": "Guía para ciudadanos de 16 años.",
+      "costo": "Gratis",
+      "tiempoEstimado": "15 días"
+    }
+  ]
+}

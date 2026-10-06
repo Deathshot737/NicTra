@@ -1,0 +1,43 @@
+{
+  "categorias": [
+    { "id": "cat_personales", "nombre": "Personales", "icono": "👤" },
+    { "id": "cat_vehiculos", "nombre": "Vehículos y Transporte", "icono": "🚗" },
+    { "id": "cat_negocios", "nombre": "Negocios y Emprendimiento", "icono": "💼" },
+    { "id": "cat_educacion", "nombre": "Educación y Universidad", "icono": "🎓" },
+    { "id": "cat_propiedades", "nombre": "Propiedades", "icono": "🏠" }
+  ],
+  "tramites": [
+    { "id": "ced1", "categoriaId": "cat_personales", "titulo": "Cédula de Identidad (1ra vez)", "entidad": "CSE", "descripcion": "Trámite gratuito para ciudadanos de 16 años.", "costo": "Gratis", "tiempoEstimado": "15 días", "icono": "🆔", "isQuickAccess": true },
+    { "id": "pas1", "categoriaId": "cat_personales", "titulo": "Pasaporte Ordinario", "entidad": "DGME", "descripcion": "Documento de viaje para mayores de edad.", "costo": "C$ 800.00", "tiempoEstimado": "8 días", "icono": "🛂", "isQuickAccess": true },
+    { "id": "rec1", "categoriaId": "cat_personales", "titulo": "Récord de Policía", "entidad": "Policía Nacional", "descripcion": "Certificado de conducta personal.", "costo": "C$ 30.00", "tiempoEstimado": "Inmediato", "icono": "👮", "isQuickAccess": true },
+    { "id": "lic1", "categoriaId": "cat_vehiculos", "titulo": "Licencia de Conducir (1ra vez)", "entidad": "Tránsito Nacional", "descripcion": "Para nuevos conductores.", "costo": "C$ 500.00", "tiempoEstimado": "1 día", "icono": "🚗", "isQuickAccess": true },
+    { "id": "sti1", "categoriaId": "cat_vehiculos", "titulo": "Sticker de Rodamiento", "entidad": "Alcaldía", "descripcion": "Impuesto anual de circulación.", "costo": "C$ 50 - 100", "tiempoEstimado": "Inmediato", "icono": "🏷️" },
+    { "id": "ruc1", "categoriaId": "cat_negocios", "titulo": "Inscripción de RUC", "entidad": "DGI", "descripcion": "Registro Único del Contribuyente.", "costo": "Gratis", "tiempoEstimado": "5 días", "icono": "💼" },
+    { "id": "mat1", "categoriaId": "cat_negocios", "titulo": "Matrícula de Negocio", "entidad": "Alcaldía", "descripcion": "Apertura formal de local.", "costo": "1% Capital", "tiempoEstimado": "3 días", "icono": "🏪" },
+    { "id": "edu1", "categoriaId": "cat_educacion", "titulo": "Título Universitario", "entidad": "Universidad", "descripcion": "Trámite de graduación.", "costo": "C$ 1,500+", "tiempoEstimado": "Variable", "icono": "🎓" }
+  ],
+  "requisitos": [
+    { "id": "r1_1", "tramiteId": "ced1", "descripcion": "Certificado de Nacimiento original", "esTramitePrevio": true, "nota": "Actualizado" },
+    { "id": "r1_2", "tramiteId": "ced1", "descripcion": "Fotocopia cédula de un testigo", "esTramitePrevio": false, "nota": "Padre o Madre" },
+    { "id": "r4_1", "tramiteId": "pas1", "descripcion": "Minuta de pago Banpro/Bancentro", "esTramitePrevio": false, "nota": "C$ 800.00" },
+    { "id": "r4_2", "tramiteId": "pas1", "descripcion": "Formulario de trámite migratorio", "esTramitePrevio": false, "nota": "C$ 50.00" },
+    { "id": "r11_1", "tramiteId": "lic1", "descripcion": "Minuta original de pago", "esTramitePrevio": false, "nota": "C$ 500.00" },
+    { "id": "r11_2", "tramiteId": "lic1", "descripcion": "Examen Psicosomático", "esTramitePrevio": false, "nota": "Cruz Blanca" },
+    { "id": "r21_1", "tramiteId": "ruc1", "descripcion": "Cédula de identidad original", "esTramitePrevio": false },
+    { "id": "r21_2", "tramiteId": "ruc1", "descripcion": "Recibo de servicio público del local", "esTramitePrevio": false },
+    { "id": "r31_1", "tramiteId": "edu1", "descripcion": "Certificado de calificaciones completo", "esTramitePrevio": true },
+    { "id": "r31_2", "tramiteId": "edu1", "descripcion": "Solvencia de biblioteca y financiera", "esTramitePrevio": true }
+  ],
+  "pasos": [
+    { "id": "p1_1", "tramiteId": "ced1", "orden": 1, "descripcion": "Acudir a delegación de Cedulación (CSE)." },
+    { "id": "p1_2", "tramiteId": "ced1", "orden": 2, "descripcion": "Presentar requisitos y tomar fotografía." },
+    { "id": "p11_1", "tramiteId": "lic1", "orden": 1, "descripcion": "Pagar arancel en el banco y aprobar exámenes médicos." },
+    { "id": "p11_2", "tramiteId": "lic1", "orden": 2, "descripcion": "Asistir a seminario y aprobar exámenes de manejo." },
+    { "id": "p21_1", "tramiteId": "ruc1", "orden": 1, "descripcion": "Presentarse en la administración de rentas (DGI)." },
+    { "id": "p31_1", "tramiteId": "edu1", "orden": 1, "descripcion": "Realizar hoja de recorrido y pagar derecho a título." }
+  ],
+  "delegaciones": [
+    { "id": "d1", "tramiteId": "ced1", "nombreOficina": "CSE - Central Managua", "departamento": "Managua", "latitud": 12.136, "longitud": -86.250, "direccion": "Frente a Metrocentro" },
+    { "id": "d2", "tramiteId": "lic1", "nombreOficina": "Tránsito Nacional", "departamento": "Managua", "latitud": 12.125, "longitud": -86.240, "direccion": "Costado Norte Plaza El Sol" }
+  ]
+}
