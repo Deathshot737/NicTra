@@ -59,6 +59,9 @@ interface TramiteDao {
     """)
     fun getDelegacionesByTramite(tramiteId: String): Flow<List<DelegacionEntity>>
 
+    @Query("SELECT * FROM delegaciones")
+    fun getAllDelegaciones(): Flow<List<DelegacionEntity>>
+
     @Query("SELECT * FROM tramites WHERE isQuickAccess = 1")
     fun getQuickAccessTramites(): Flow<List<TramiteEntity>>
 

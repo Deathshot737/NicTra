@@ -27,6 +27,9 @@ class TramiteRepository(
     fun getDelegacionesByTramite(tramiteId: String): Flow<List<DelegacionEntity>> = 
         tramiteDao.getDelegacionesByTramite(tramiteId)
 
+    fun getAllDelegaciones(): Flow<List<DelegacionEntity>> = 
+        tramiteDao.getAllDelegaciones()
+
     fun getQuickAccessTramites(): Flow<List<TramiteEntity>> = tramiteDao.getQuickAccessTramites()
 
     fun getRecentTramites(): Flow<List<TramiteEntity>> = tramiteDao.getRecentTramites()

@@ -34,7 +34,8 @@ fun HomeScreen(
     completedCount: Int,
     onCategoryClick: (CategoriaEntity) -> Unit,
     onTramiteClick: (String) -> Unit,
-    onMyTramitesClick: () -> Unit
+    onMyTramitesClick: () -> Unit,
+    onMapClick: () -> Unit
 ) {
     Scaffold(
         bottomBar = {
@@ -66,7 +67,7 @@ fun HomeScreen(
                     icon = { Icon(Icons.Default.Place, contentDescription = "Mapa") },
                     label = { Text("Mapa") },
                     selected = false,
-                    onClick = { }
+                    onClick = onMapClick
                 )
             }
         }

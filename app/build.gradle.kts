@@ -64,6 +64,10 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     
+    // Maps
+    implementation(libs.maps.compose)
+    implementation(libs.play.services.maps)
+    
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)

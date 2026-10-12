@@ -15,6 +15,7 @@ import com.nictra.data.local.entities.CategoriaEntity
 import com.nictra.data.local.entities.TramiteEntity
 import com.nictra.data.repository.TramiteRepository
 import com.nictra.ui.home.HomeScreen
+import com.nictra.ui.map.MapScreen
 import com.nictra.ui.tramites.MyTramitesScreen
 import com.nictra.ui.tramites.TramiteDetailScreen
 import com.nictra.ui.tramites.TramitesListScreen
@@ -33,6 +34,8 @@ class MainActivity : ComponentActivity() {
             var selectedCategory by remember { mutableStateOf<CategoriaEntity?>(null) }
             var selectedTramiteId by remember { mutableStateOf<String?>(null) }
             var showMyTramites by remember { mutableStateOf(false) }
+            var showMap by remember { mutableStateOf(false) }
+            var selectedDelegationId by remember { mutableStateOf<String?>(null) }
             
             var searchQuery by remember { mutableStateOf("") }
             val searchResults by repository.searchTramites(searchQuery).collectAsState(initial = emptyList())
@@ -69,7 +72,6 @@ class MainActivity : ComponentActivity() {
                                     onRequisitoCheckChange = { reqId, checked ->
                                         lifecycleScope.launch {
                                             repository.updateRequisitoStatus(reqId, checked)
-                                            // Al marcar un requisito, empezamos seguimiento automáticamente
                                             if (checked && tramite?.lastVisited == null) {
                                                 repository.markTramiteAsVisited(id)
                                             }
@@ -90,11 +92,39 @@ class MainActivity : ComponentActivity() {
                                             repository.markTramiteAsVisited(id)
                                         }
                                     },
+                                    onDelegationClick = { delId ->
+                                        selectedDelegationId = delId
+                                        showMap = true
+                                        selectedTramiteId = null
+                                    },
                                     onSaveClick = { 
                                         selectedTramiteId = null 
                                     }
                                 )
                             }
+                        }
+                        showMap -> {
+                            BackHandler {
+                                showMap = false
+                                selectedDelegationId = null
+                            }
+                            val allDelegaciones by repository.getAllDelegaciones().collectAsState(initial = emptyList())
+                            val completedCount by repository.getCompletedTramitesCount().collectAsState(initial = 0)
+
+                            MapScreen(
+                                delegaciones = allDelegaciones,
+                                initialSelectedDelegationId = selectedDelegationId,
+                                onHomeClick = { 
+                                    showMap = false
+                                    selectedDelegationId = null
+                                },
+                                onMyTramitesClick = {
+                                    showMap = false
+                                    selectedDelegationId = null
+                                    showMyTramites = true
+                                },
+                                completedCount = completedCount
+                            )
                         }
                         showMyTramites -> {
                             BackHandler {
@@ -110,7 +140,10 @@ class MainActivity : ComponentActivity() {
                                     selectedTramiteId = tramiteId
                                 },
                                 onHomeClick = { showMyTramites = false },
-                                onMapClick = { },
+                                onMapClick = { 
+                                    showMyTramites = false
+                                    showMap = true 
+                                },
                                 completedCount = completedCount
                             )
                         }
@@ -159,6 +192,9 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onMyTramitesClick = {
                                     showMyTramites = true
+                                },
+                                onMapClick = {
+                                    showMap = true
                                 }
                             )
                         }

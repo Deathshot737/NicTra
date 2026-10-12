@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -42,6 +43,7 @@ fun TramiteDetailScreen(
     onCompleteClick: (Boolean) -> Unit,
     onResetClick: () -> Unit,
     onStartTracking: () -> Unit,
+    onDelegationClick: (String) -> Unit,
     onSaveClick: () -> Unit
 ) {
     val checkedCount = requisitos.count { it.isChecked }
@@ -90,8 +92,9 @@ fun TramiteDetailScreen(
                     onClick = {
                         showResetConfirm = false
                         onResetClick()
-                        // Si lo quitamos, volvemos atrás para que el usuario vea que ya no está en seguimiento
-                        onBackClick()
+                        if (!tramite.isCompleted) {
+                            onBackClick()
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
                 ) {
@@ -116,7 +119,6 @@ fun TramiteDetailScreen(
                     }
                 },
                 actions = {
-                    // Botón para quitar de Mis Trámites solo si se está siguiendo
                     if (isTracking) {
                         IconButton(onClick = { showResetConfirm = true }) {
                             Icon(Icons.Outlined.Delete, contentDescription = "Quitar", tint = Color.White)
@@ -284,7 +286,7 @@ fun TramiteDetailScreen(
                     SectionHeader("📍 Dónde tramitar")
                 }
                 items(delegaciones) { delegacion ->
-                    DelegacionCard(delegacion)
+                    DelegacionCard(delegacion, onClick = { onDelegationClick(delegacion.id) })
                 }
             }
             
@@ -297,7 +299,7 @@ fun TramiteDetailScreen(
 fun SectionHeader(title: String) {
     Text(
         text = title,
-        modifier = Modifier.padding(start = 24.dp, top = 24.dp, bottom = 8.dp),
+        modifier = Modifier.padding(start = 24.dp, top = 16.dp, bottom = 8.dp),
         fontWeight = FontWeight.Bold,
         fontSize = 16.sp,
         color = Color(0xFF1A3B70)
@@ -446,11 +448,12 @@ fun TagItem(text: String) {
 }
 
 @Composable
-fun DelegacionCard(delegacion: DelegacionEntity) {
+fun DelegacionCard(delegacion: DelegacionEntity, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = Color.White),
         shape = RoundedCornerShape(12.dp)
     ) {
