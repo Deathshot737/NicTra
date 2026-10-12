@@ -1,9 +1,12 @@
 package com.nictra.ui.tramites
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nictra.data.local.entities.DelegacionEntity
@@ -34,11 +39,72 @@ fun TramiteDetailScreen(
     delegaciones: List<DelegacionEntity>,
     onBackClick: () -> Unit,
     onRequisitoCheckChange: (String, Boolean) -> Unit,
+    onCompleteClick: (Boolean) -> Unit,
+    onResetClick: () -> Unit,
+    onStartTracking: () -> Unit,
     onSaveClick: () -> Unit
 ) {
     val checkedCount = requisitos.count { it.isChecked }
     val totalReq = requisitos.size
     val progress = if (totalReq > 0) checkedCount.toFloat() / totalReq else 0f
+    val allRequisitosDone = totalReq > 0 && checkedCount == totalReq
+    
+    val isTracking = tramite.lastVisited != null
+    
+    var showSuccessDialog by remember { mutableStateOf(false) }
+    var showResetConfirm by remember { mutableStateOf(false) }
+
+    // Dialogo de éxito al finalizar
+    if (showSuccessDialog) {
+        AlertDialog(
+            onDismissRequest = { showSuccessDialog = false },
+            icon = { Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF2E7D32), modifier = Modifier.size(48.dp)) },
+            title = { Text("¡Trámite Finalizado!", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
+            text = { Text("Has completado este trámite con éxito. Ahora aparecerá en tu sección de trámites completados.", textAlign = TextAlign.Center) },
+            confirmButton = {
+                TextButton(onClick = { 
+                    showSuccessDialog = false
+                    onBackClick() 
+                }) {
+                    Text("Entendido", fontWeight = FontWeight.Bold)
+                }
+            }
+        )
+    }
+
+    // Dialogo de confirmación para reiniciar o quitar
+    if (showResetConfirm) {
+        AlertDialog(
+            onDismissRequest = { showResetConfirm = false },
+            title = { Text(if (tramite.isCompleted) "¿Volver a tramitar?" else "¿Quitar de Mis Trámites?") },
+            text = { 
+                Text(
+                    if (tramite.isCompleted) 
+                        "Esta acción borrará tu progreso anterior para que puedas empezar de nuevo. ¿Deseas continuar?" 
+                    else 
+                        "Se borrarán todos los documentos marcados y este trámite dejará de aparecer en tu lista de seguimiento. ¿Deseas continuar?"
+                ) 
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showResetConfirm = false
+                        onResetClick()
+                        // Si lo quitamos, volvemos atrás para que el usuario vea que ya no está en seguimiento
+                        onBackClick()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
+                ) {
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetConfirm = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -47,6 +113,14 @@ fun TramiteDetailScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Atrás", tint = Color.White)
+                    }
+                },
+                actions = {
+                    // Botón para quitar de Mis Trámites solo si se está siguiendo
+                    if (isTracking) {
+                        IconButton(onClick = { showResetConfirm = true }) {
+                            Icon(Icons.Outlined.Delete, contentDescription = "Quitar", tint = Color.White)
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A3B70))
@@ -58,21 +132,71 @@ fun TramiteDetailScreen(
                 shadowElevation = 16.dp,
                 color = Color.White
             ) {
-                Button(
-                    onClick = onSaveClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .height(56.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFD4EED8),
-                        contentColor = Color(0xFF2E7D32)
-                    )
-                ) {
-                    Icon(Icons.Default.CheckCircle, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Guardar progreso offline", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Column(modifier = Modifier.padding(16.dp)) {
+                    if (!isTracking) {
+                        Button(
+                            onClick = onStartTracking,
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF1A3B70),
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Añadir a Mis Trámites", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        }
+                    } else if (tramite.isCompleted) {
+                        Button(
+                            onClick = { showResetConfirm = true },
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFF5F7FA),
+                                contentColor = Color(0xFF1A3B70)
+                            ),
+                            border = BorderStroke(1.dp, Color(0xFF1A3B70).copy(alpha = 0.2f))
+                        ) {
+                            Icon(Icons.Default.Refresh, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Volver a tramitar", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        }
+                    } else {
+                        if (allRequisitosDone) {
+                            Button(
+                                onClick = { 
+                                    onCompleteClick(true)
+                                    showSuccessDialog = true 
+                                },
+                                modifier = Modifier.fillMaxWidth().height(56.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF1A3B70),
+                                    contentColor = Color.White
+                                )
+                            ) {
+                                Icon(Icons.Default.DoneAll, contentDescription = null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Finalizar Trámite", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        
+                        Button(
+                            onClick = onSaveClick,
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFD4EED8),
+                                contentColor = Color(0xFF2E7D32)
+                            )
+                        ) {
+                            Icon(Icons.Default.Save, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Guardar progreso offline", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        }
+                    }
                 }
             }
         }
@@ -104,7 +228,32 @@ fun TramiteDetailScreen(
                             TagItem(tramite.tiempoEstimado)
                             TagItem(tramite.costo)
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        AnimatedVisibility(
+                            visible = tramite.isCompleted,
+                            enter = fadeIn(animationSpec = tween(500)),
+                            exit = fadeOut()
+                        ) {
+                            Surface(
+                                color = Color(0xFF4CAF50),
+                                shape = RoundedCornerShape(4.dp),
+                                modifier = Modifier.padding(top = 16.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        "ESTADO: FINALIZADO",
+                                        color = Color.White,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -118,7 +267,7 @@ fun TramiteDetailScreen(
             }
 
             items(requisitos) { requisito ->
-                RequisitoCard(requisito, onRequisitoCheckChange)
+                RequisitoCard(requisito, onRequisitoCheckChange, enabled = !tramite.isCompleted)
             }
 
             if (pasos.isNotEmpty()) {
@@ -132,13 +281,7 @@ fun TramiteDetailScreen(
 
             if (delegaciones.isNotEmpty()) {
                 item {
-                    Text(
-                        "📍 DONDE TRAMITAR",
-                        modifier = Modifier.padding(start = 24.dp, top = 24.dp, bottom = 8.dp),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
+                    SectionHeader("📍 Dónde tramitar")
                 }
                 items(delegaciones) { delegacion ->
                     DelegacionCard(delegacion)
@@ -154,7 +297,7 @@ fun TramiteDetailScreen(
 fun SectionHeader(title: String) {
     Text(
         text = title,
-        modifier = Modifier.padding(start = 24.dp, top = 16.dp, bottom = 8.dp),
+        modifier = Modifier.padding(start = 24.dp, top = 24.dp, bottom = 8.dp),
         fontWeight = FontWeight.Bold,
         fontSize = 16.sp,
         color = Color(0xFF1A3B70)
@@ -221,7 +364,11 @@ fun ProgressCard(checked: Int, total: Int, progress: Float) {
 }
 
 @Composable
-fun RequisitoCard(requisito: RequisitoEntity, onCheckChange: (String, Boolean) -> Unit) {
+fun RequisitoCard(
+    requisito: RequisitoEntity, 
+    onCheckChange: (String, Boolean) -> Unit,
+    enabled: Boolean = true
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Card(
@@ -240,7 +387,8 @@ fun RequisitoCard(requisito: RequisitoEntity, onCheckChange: (String, Boolean) -
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
                     checked = requisito.isChecked,
-                    onCheckedChange = { onCheckChange(requisito.id, it) },
+                    onCheckedChange = { if (enabled) onCheckChange(requisito.id, it) },
+                    enabled = enabled,
                     colors = CheckboxDefaults.colors(checkedColor = Color(0xFFFFC107))
                 )
                 Column(modifier = Modifier.weight(1f)) {

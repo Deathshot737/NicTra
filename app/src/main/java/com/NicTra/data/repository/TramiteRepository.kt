@@ -33,6 +33,9 @@ class TramiteRepository(
     
     fun getCompletedTramitesCount(): Flow<Int> = tramiteDao.getCompletedTramitesCount()
 
+    fun getMyTramitesWithProgress(): Flow<List<TramiteProgress>> = 
+        tramiteDao.getMyTramitesWithProgress()
+
     suspend fun markTramiteAsVisited(tramiteId: String) {
         tramiteDao.updateLastVisited(tramiteId, System.currentTimeMillis())
     }
@@ -43,5 +46,9 @@ class TramiteRepository(
 
     suspend fun updateRequisitoStatus(requisitoId: String, checked: Boolean) {
         tramiteDao.updateRequisitoStatus(requisitoId, checked)
+    }
+
+    suspend fun resetTramite(tramiteId: String) {
+        tramiteDao.resetTramite(tramiteId)
     }
 }

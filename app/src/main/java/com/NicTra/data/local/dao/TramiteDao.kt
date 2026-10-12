@@ -68,12 +68,31 @@ interface TramiteDao {
     @Query("SELECT COUNT(*) FROM tramites WHERE isCompleted = 1")
     fun getCompletedTramitesCount(): Flow<Int>
 
+    @Query("""
+        SELECT t.*, 
+        (SELECT COUNT(*) FROM requisitos r WHERE r.tramiteId = t.id) as totalRequisitos,
+        (SELECT COUNT(*) FROM requisitos r WHERE r.tramiteId = t.id AND r.isChecked = 1) as checkedRequisitos
+        FROM tramites t
+        WHERE t.lastVisited IS NOT NULL OR (SELECT COUNT(*) FROM requisitos r WHERE r.tramiteId = t.id AND r.isChecked = 1) > 0
+    """)
+    fun getMyTramitesWithProgress(): Flow<List<TramiteProgress>>
+
     @Query("UPDATE tramites SET lastVisited = :timestamp WHERE id = :tramiteId")
-    suspend fun updateLastVisited(tramiteId: String, timestamp: Long)
+    suspend fun updateLastVisited(tramiteId: String, timestamp: Long?)
 
     @Query("UPDATE tramites SET isCompleted = :completed WHERE id = :tramiteId")
     suspend fun updateCompletionStatus(tramiteId: String, completed: Boolean)
 
     @Query("UPDATE requisitos SET isChecked = :checked WHERE id = :requisitoId")
     suspend fun updateRequisitoStatus(requisitoId: String, checked: Boolean)
+
+    @Transaction
+    suspend fun resetTramite(tramiteId: String) {
+        updateLastVisited(tramiteId, null)
+        updateCompletionStatus(tramiteId, false)
+        uncheckAllRequisitos(tramiteId)
+    }
+
+    @Query("UPDATE requisitos SET isChecked = 0 WHERE tramiteId = :tramiteId")
+    suspend fun uncheckAllRequisitos(tramiteId: String)
 }

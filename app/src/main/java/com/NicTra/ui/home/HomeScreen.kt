@@ -33,7 +33,8 @@ fun HomeScreen(
     onSearchQueryChange: (String) -> Unit,
     completedCount: Int,
     onCategoryClick: (CategoriaEntity) -> Unit,
-    onTramiteClick: (String) -> Unit
+    onTramiteClick: (String) -> Unit,
+    onMyTramitesClick: () -> Unit
 ) {
     Scaffold(
         bottomBar = {
@@ -59,7 +60,7 @@ fun HomeScreen(
                     },
                     label = { Text("Mis Trámites") },
                     selected = false,
-                    onClick = { }
+                    onClick = onMyTramitesClick
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Place, contentDescription = "Mapa") },

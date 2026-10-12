@@ -15,6 +15,7 @@ import com.nictra.data.local.entities.CategoriaEntity
 import com.nictra.data.local.entities.TramiteEntity
 import com.nictra.data.repository.TramiteRepository
 import com.nictra.ui.home.HomeScreen
+import com.nictra.ui.tramites.MyTramitesScreen
 import com.nictra.ui.tramites.TramiteDetailScreen
 import com.nictra.ui.tramites.TramitesListScreen
 import com.nictra.ui.welcome.WelcomeScreen
@@ -31,8 +32,8 @@ class MainActivity : ComponentActivity() {
             var showWelcome by remember { mutableStateOf(true) }
             var selectedCategory by remember { mutableStateOf<CategoriaEntity?>(null) }
             var selectedTramiteId by remember { mutableStateOf<String?>(null) }
+            var showMyTramites by remember { mutableStateOf(false) }
             
-            // Estado para la búsqueda
             var searchQuery by remember { mutableStateOf("") }
             val searchResults by repository.searchTramites(searchQuery).collectAsState(initial = emptyList())
 
@@ -68,6 +69,25 @@ class MainActivity : ComponentActivity() {
                                     onRequisitoCheckChange = { reqId, checked ->
                                         lifecycleScope.launch {
                                             repository.updateRequisitoStatus(reqId, checked)
+                                            // Al marcar un requisito, empezamos seguimiento automáticamente
+                                            if (checked && tramite?.lastVisited == null) {
+                                                repository.markTramiteAsVisited(id)
+                                            }
+                                        }
+                                    },
+                                    onCompleteClick = { completed ->
+                                        lifecycleScope.launch {
+                                            repository.updateCompletionStatus(id, completed)
+                                        }
+                                    },
+                                    onResetClick = {
+                                        lifecycleScope.launch {
+                                            repository.resetTramite(id)
+                                        }
+                                    },
+                                    onStartTracking = {
+                                        lifecycleScope.launch {
+                                            repository.markTramiteAsVisited(id)
                                         }
                                     },
                                     onSaveClick = { 
@@ -75,6 +95,24 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
+                        }
+                        showMyTramites -> {
+                            BackHandler {
+                                showMyTramites = false
+                            }
+                            
+                            val myTramitesProgress by repository.getMyTramitesWithProgress().collectAsState(initial = emptyList())
+                            val completedCount by repository.getCompletedTramitesCount().collectAsState(initial = 0)
+                            
+                            MyTramitesScreen(
+                                tramitesProgress = myTramitesProgress,
+                                onTramiteClick = { tramiteId ->
+                                    selectedTramiteId = tramiteId
+                                },
+                                onHomeClick = { showMyTramites = false },
+                                onMapClick = { },
+                                completedCount = completedCount
+                            )
                         }
                         selectedCategory != null -> {
                             BackHandler {
@@ -89,15 +127,11 @@ class MainActivity : ComponentActivity() {
                                 tramites = tramites,
                                 onBackClick = { selectedCategory = null },
                                 onTramiteClick = { tramiteId ->
-                                    lifecycleScope.launch {
-                                        repository.markTramiteAsVisited(tramiteId)
-                                    }
                                     selectedTramiteId = tramiteId
                                 }
                             )
                         }
                         else -> {
-                            // En el inicio, si hay texto de búsqueda, el botón atrás la limpia
                             if (searchQuery.isNotEmpty()) {
                                 BackHandler {
                                     searchQuery = ""
@@ -121,10 +155,10 @@ class MainActivity : ComponentActivity() {
                                     selectedCategory = category
                                 },
                                 onTramiteClick = { tramiteId ->
-                                    lifecycleScope.launch {
-                                        repository.markTramiteAsVisited(tramiteId)
-                                    }
                                     selectedTramiteId = tramiteId
+                                },
+                                onMyTramitesClick = {
+                                    showMyTramites = true
                                 }
                             )
                         }
