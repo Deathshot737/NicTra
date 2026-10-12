@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.nictra.data.local.dao.TramiteDao
 import com.nictra.data.local.entities.*
 import com.nictra.data.local.seed.DatabaseSeeder
@@ -20,9 +19,10 @@ import kotlinx.coroutines.launch
         TramiteEntity::class,
         RequisitoEntity::class,
         PasoEntity::class,
-        DelegacionEntity::class
+        DelegacionEntity::class,
+        DelegacionTramiteCrossRef::class
     ],
-    version = 55, // Versión 55: Catálogo de 20 trámites con requisitos y pasos completos
+    version = 221, // Incrementado para reflejar cambios en N:N de delegaciones
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -48,7 +48,7 @@ abstract class AppDatabase : RoomDatabase() {
                 INSTANCE = instance
                 
                 applicationScope.launch {
-                    Log.i("NicTraDB", "Instalando catálogo completo de trámites detallados...")
+                    Log.i("NicTraDB", "Iniciando proceso de siembra de base de datos...")
                     DatabaseSeeder.seedDatabase(context.applicationContext, instance.tramiteDao())
                 }
 

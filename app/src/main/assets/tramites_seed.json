@@ -1,43 +1,2362 @@
 {
   "categorias": [
-    { "id": "cat_personales", "nombre": "Personales", "icono": "👤" },
-    { "id": "cat_vehiculos", "nombre": "Vehículos y Transporte", "icono": "🚗" },
-    { "id": "cat_negocios", "nombre": "Negocios y Emprendimiento", "icono": "💼" },
-    { "id": "cat_educacion", "nombre": "Educación y Universidad", "icono": "🎓" },
-    { "id": "cat_propiedades", "nombre": "Propiedades", "icono": "🏠" }
+    {
+      "id": "cat_personales",
+      "nombre": "Personales",
+      "icono": "👤"
+    },
+    {
+      "id": "cat_vehiculos",
+      "nombre": "Vehículos y Transporte",
+      "icono": "🚗"
+    },
+    {
+      "id": "cat_negocios",
+      "nombre": "Negocios y Emprendimiento",
+      "icono": "💼"
+    },
+    {
+      "id": "cat_educacion",
+      "nombre": "Educación y Universidad",
+      "icono": "🎓"
+    },
+    {
+      "id": "cat_propiedades",
+      "nombre": "Propiedades",
+      "icono": "🏠"
+    }
   ],
   "tramites": [
-    { "id": "ced1", "categoriaId": "cat_personales", "titulo": "Cédula de Identidad (1ra vez)", "entidad": "CSE", "descripcion": "Trámite gratuito para ciudadanos de 16 años.", "costo": "Gratis", "tiempoEstimado": "15 días", "icono": "🆔", "isQuickAccess": true },
-    { "id": "pas1", "categoriaId": "cat_personales", "titulo": "Pasaporte Ordinario", "entidad": "DGME", "descripcion": "Documento de viaje para mayores de edad.", "costo": "C$ 800.00", "tiempoEstimado": "8 días", "icono": "🛂", "isQuickAccess": true },
-    { "id": "rec1", "categoriaId": "cat_personales", "titulo": "Récord de Policía", "entidad": "Policía Nacional", "descripcion": "Certificado de conducta personal.", "costo": "C$ 30.00", "tiempoEstimado": "Inmediato", "icono": "👮", "isQuickAccess": true },
-    { "id": "lic1", "categoriaId": "cat_vehiculos", "titulo": "Licencia de Conducir (1ra vez)", "entidad": "Tránsito Nacional", "descripcion": "Para nuevos conductores.", "costo": "C$ 500.00", "tiempoEstimado": "1 día", "icono": "🚗", "isQuickAccess": true },
-    { "id": "sti1", "categoriaId": "cat_vehiculos", "titulo": "Sticker de Rodamiento", "entidad": "Alcaldía", "descripcion": "Impuesto anual de circulación.", "costo": "C$ 50 - 100", "tiempoEstimado": "Inmediato", "icono": "🏷️" },
-    { "id": "ruc1", "categoriaId": "cat_negocios", "titulo": "Inscripción de RUC", "entidad": "DGI", "descripcion": "Registro Único del Contribuyente.", "costo": "Gratis", "tiempoEstimado": "5 días", "icono": "💼" },
-    { "id": "mat1", "categoriaId": "cat_negocios", "titulo": "Matrícula de Negocio", "entidad": "Alcaldía", "descripcion": "Apertura formal de local.", "costo": "1% Capital", "tiempoEstimado": "3 días", "icono": "🏪" },
-    { "id": "edu1", "categoriaId": "cat_educacion", "titulo": "Título Universitario", "entidad": "Universidad", "descripcion": "Trámite de graduación.", "costo": "C$ 1,500+", "tiempoEstimado": "Variable", "icono": "🎓" }
+    {
+      "id": "ced1",
+      "categoriaId": "cat_personales",
+      "titulo": "Cédula de Identidad (1ra vez)",
+      "entidad": "CSE",
+      "descripcion": "Solicitud para ciudadanos de 16 años.",
+      "costo": "Gratis",
+      "tiempoEstimado": "15 días",
+      "icono": "🆔",
+      "isQuickAccess": true
+    },
+    {
+      "id": "ced2",
+      "categoriaId": "cat_personales",
+      "titulo": "Reposición de Cédula",
+      "entidad": "CSE",
+      "descripcion": "Por pérdida o robo del documento.",
+      "costo": "C$ 300.00",
+      "tiempoEstimado": "8 días",
+      "icono": "🆔"
+    },
+    {
+      "id": "ced3",
+      "categoriaId": "cat_personales",
+      "titulo": "Renovación de Cédula",
+      "entidad": "CSE",
+      "descripcion": "Por vencimiento de vigencia.",
+      "costo": "C$ 300.00",
+      "tiempoEstimado": "8 días",
+      "icono": "🆔"
+    },
+    {
+      "id": "pas4",
+      "categoriaId": "cat_personales",
+      "titulo": "Pasaporte por Primera Vez",
+      "entidad": "DGME",
+      "descripcion": "Documento de viaje para mayores de edad.",
+      "costo": "C$ 800.00",
+      "tiempoEstimado": "8 días",
+      "icono": "🛂",
+      "isQuickAccess": true
+    },
+    {
+      "id": "pas5",
+      "categoriaId": "cat_personales",
+      "titulo": "Renovación de Pasaporte",
+      "entidad": "DGME",
+      "descripcion": "Trámite por libreta vencida.",
+      "costo": "C$ 800.00",
+      "tiempoEstimado": "8 días",
+      "icono": "🛂"
+    },
+    {
+      "id": "rec6",
+      "categoriaId": "cat_personales",
+      "titulo": "Récord de Policía",
+      "entidad": "Policía Nacional",
+      "descripcion": "Certificado de antecedentes penales.",
+      "costo": "C$ 30.00",
+      "tiempoEstimado": "Inmediato",
+      "icono": "👮",
+      "isQuickAccess": true
+    },
+    {
+      "id": "mov7",
+      "categoriaId": "cat_personales",
+      "titulo": "Movimiento Migratorio",
+      "entidad": "DGME",
+      "descripcion": "Historial de entradas y salidas.",
+      "costo": "C$ 110.00",
+      "tiempoEstimado": "5 días",
+      "icono": "✈️"
+    },
+    {
+      "id": "nac8",
+      "categoriaId": "cat_personales",
+      "titulo": "Certificado de Nacimiento",
+      "entidad": "Alcaldía",
+      "descripcion": "Reposición o copia de acta.",
+      "costo": "C$ 60.00",
+      "tiempoEstimado": "1 día",
+      "icono": "👶"
+    },
+    {
+      "id": "mat9",
+      "categoriaId": "cat_personales",
+      "titulo": "Certificado de Matrimonio",
+      "entidad": "Alcaldía",
+      "descripcion": "Acreditación unión legal.",
+      "costo": "C$ 60.00",
+      "tiempoEstimado": "1 día",
+      "icono": "💍"
+    },
+    {
+      "id": "def10",
+      "categoriaId": "cat_personales",
+      "titulo": "Certificado de Defunción",
+      "entidad": "Alcaldía",
+      "descripcion": "Registro de fallecimiento.",
+      "costo": "C$ 60.00",
+      "tiempoEstimado": "1 día",
+      "icono": "✝️"
+    },
+    {
+      "id": "lic11",
+      "categoriaId": "cat_vehiculos",
+      "titulo": "Licencia de Conducir (1ra vez)",
+      "entidad": "Tránsito Nacional",
+      "descripcion": "Para nuevos conductores.",
+      "costo": "C$ 500.00 + Exámenes",
+      "tiempoEstimado": "1 día",
+      "icono": "🚗",
+      "isQuickAccess": true
+    },
+    {
+      "id": "lic12",
+      "categoriaId": "cat_vehiculos",
+      "titulo": "Renovación de Licencia",
+      "entidad": "Tránsito Nacional",
+      "descripcion": "Actualización de documento vencido.",
+      "costo": "C$ 500.00",
+      "tiempoEstimado": "1 día",
+      "icono": "🚗"
+    },
+    {
+      "id": "lic13",
+      "categoriaId": "cat_vehiculos",
+      "titulo": "Reposición de Licencia",
+      "entidad": "Tránsito Nacional",
+      "descripcion": "Por pérdida o robo.",
+      "costo": "C$ 400.00",
+      "tiempoEstimado": "1 día",
+      "icono": "🚗"
+    },
+    {
+      "id": "mul14",
+      "categoriaId": "cat_vehiculos",
+      "titulo": "Pago de Multas de Tránsito",
+      "entidad": "Policía Nacional",
+      "descripcion": "Cancelación infracciones.",
+      "costo": "Variable",
+      "tiempoEstimado": "Inmediato",
+      "icono": "📄"
+    },
+    {
+      "id": "sti15",
+      "categoriaId": "cat_vehiculos",
+      "titulo": "Sticker de Rodamiento",
+      "entidad": "Alcaldía Municipal",
+      "descripcion": "Impuesto municipal anual.",
+      "costo": "C$ 50 - 100",
+      "tiempoEstimado": "Inmediato",
+      "icono": "🏷️"
+    },
+    {
+      "id": "cir16",
+      "categoriaId": "cat_vehiculos",
+      "titulo": "Emisión de Circulación (Nueva)",
+      "entidad": "Tránsito Nacional",
+      "descripcion": "Matrícula inicial.",
+      "costo": "1% Valor + C$ 100",
+      "tiempoEstimado": "3 días",
+      "icono": "🚙"
+    },
+    {
+      "id": "tra17",
+      "categoriaId": "cat_vehiculos",
+      "titulo": "Traspaso de Vehículo",
+      "entidad": "Tránsito Nacional",
+      "descripcion": "Cambio de dueño.",
+      "costo": "1% Valor + C$ 100",
+      "tiempoEstimado": "3 días",
+      "icono": "🔄"
+    },
+    {
+      "id": "ins18",
+      "categoriaId": "cat_vehiculos",
+      "titulo": "Inspección Mecánica",
+      "entidad": "Talleres Autorizados",
+      "descripcion": "Revisión técnica anual.",
+      "costo": "C$ 300 - 600",
+      "tiempoEstimado": "Inmediato",
+      "icono": "🔧"
+    },
+    {
+      "id": "gas19",
+      "categoriaId": "cat_vehiculos",
+      "titulo": "Emisión de Gases",
+      "entidad": "Talleres Autorizados",
+      "descripcion": "Control contaminante.",
+      "costo": "C$ 200 - 400",
+      "tiempoEstimado": "Inmediato",
+      "icono": "💨"
+    },
+    {
+      "id": "pla20",
+      "categoriaId": "cat_vehiculos",
+      "titulo": "Cambio de Placas Metálicas",
+      "entidad": "Tránsito Nacional",
+      "descripcion": "Reposición por pérdida o daño.",
+      "costo": "C$ 300.00",
+      "tiempoEstimado": "5 días",
+      "icono": "🚘"
+    },
+    {
+      "id": "neg21",
+      "categoriaId": "cat_negocios",
+      "titulo": "Inscripción en Régimen de Cuota Fija",
+      "entidad": "DGI",
+      "descripcion": "Inscripción para pequeños negocios bajo cuota fija.",
+      "costo": "C$ 0.00",
+      "tiempoEstimado": "Varios días",
+      "icono": "💼"
+    },
+    {
+      "id": "neg22",
+      "categoriaId": "cat_negocios",
+      "titulo": "Inscripción en Régimen General",
+      "entidad": "DGI",
+      "descripcion": "Registro para contribuyentes de régimen general.",
+      "costo": "C$ 0.00",
+      "tiempoEstimado": "Inmediato",
+      "icono": "💼"
+    },
+    {
+      "id": "neg23",
+      "categoriaId": "cat_negocios",
+      "titulo": "Matrícula de Negocio (Apertura)",
+      "entidad": "Alcaldía Municipal",
+      "descripcion": "Apertura y registro municipal de establecimiento.",
+      "costo": "1% capital inicial",
+      "tiempoEstimado": "Inmediato",
+      "icono": "💼"
+    },
+    {
+      "id": "neg24",
+      "categoriaId": "cat_negocios",
+      "titulo": "Renovación de Matrícula Anual",
+      "entidad": "Alcaldía Municipal",
+      "descripcion": "Actualización anual de matrícula de negocio.",
+      "costo": "Variable (aprox. 2%)",
+      "tiempoEstimado": "Inmediato",
+      "icono": "💼"
+    },
+    {
+      "id": "neg25",
+      "categoriaId": "cat_negocios",
+      "titulo": "Inscripción como Empleador (Patronal)",
+      "entidad": "INSS",
+      "descripcion": "Registro patronal ante la seguridad social.",
+      "costo": "C$ 0.00",
+      "tiempoEstimado": "Inmediato",
+      "icono": "💼"
+    },
+    {
+      "id": "neg26",
+      "categoriaId": "cat_negocios",
+      "titulo": "Certificado de Salud (Manipulación de Alimentos)",
+      "entidad": "MINSA",
+      "descripcion": "Carnet de salud para manipuladores de alimentos.",
+      "costo": "C$ 100.00 - C$ 150.00",
+      "tiempoEstimado": "1 día",
+      "icono": "💼"
+    },
+    {
+      "id": "neg27",
+      "categoriaId": "cat_negocios",
+      "titulo": "Licencia Sanitaria para Local Comercial",
+      "entidad": "MINSA / SILAIS",
+      "descripcion": "Permiso higiénico sanitario de funcionamiento.",
+      "costo": "C$ 500.00 - C$ 1,500.00",
+      "tiempoEstimado": "Varios días",
+      "icono": "💼"
+    },
+    {
+      "id": "neg28",
+      "categoriaId": "cat_negocios",
+      "titulo": "Permiso de Operación de Bomberos",
+      "entidad": "Dirección General de Bomberos",
+      "descripcion": "Inspección y certificación de seguridad contra incendios.",
+      "costo": "Variable",
+      "tiempoEstimado": "Varios días",
+      "icono": "💼"
+    },
+    {
+      "id": "neg29",
+      "categoriaId": "cat_negocios",
+      "titulo": "Registro de Marca Comercial",
+      "entidad": "MIFIC - RPI",
+      "descripcion": "Protección legal de propiedad intelectual y marcas.",
+      "costo": "C$ 200.00 + US$ 50.00",
+      "tiempoEstimado": "Varios días",
+      "icono": "💼"
+    },
+    {
+      "id": "neg30",
+      "categoriaId": "cat_negocios",
+      "titulo": "Solvencia Fiscal Municipal",
+      "entidad": "Alcaldía Municipal",
+      "descripcion": "Constancia de estar al día con los tributos municipales.",
+      "costo": "C$ 50.00 - C$ 100.00",
+      "tiempoEstimado": "Inmediato",
+      "icono": "💼"
+    },
+    {
+      "id": "edu31",
+      "categoriaId": "cat_educacion",
+      "titulo": "Certificado de Calificaciones (Historial Académico)",
+      "entidad": "UNAN-León",
+      "descripcion": "Historial de notas de la carrera.",
+      "costo": "C$ 50.00",
+      "tiempoEstimado": "1-3 días",
+      "icono": "🎓"
+    },
+    {
+      "id": "edu32",
+      "categoriaId": "cat_educacion",
+      "titulo": "Constancia de Alumno Activo",
+      "entidad": "UNAN-León",
+      "descripcion": "Acreditación de matrícula en periodo actual.",
+      "costo": "C$ 30.00",
+      "tiempoEstimado": "Inmediato / 24h",
+      "icono": "🎓"
+    },
+    {
+      "id": "edu33",
+      "categoriaId": "cat_educacion",
+      "titulo": "Retiro de Asignaturas",
+      "entidad": "UNAN-León",
+      "descripcion": "Baja de materia dentro del plazo establecido.",
+      "costo": "C$ 0.00",
+      "tiempoEstimado": "Inmediato",
+      "icono": "🎓"
+    },
+    {
+      "id": "edu34",
+      "categoriaId": "cat_educacion",
+      "titulo": "Inscripción de Propuesta de Proyecto o Monografía",
+      "entidad": "UNAN-León",
+      "descripcion": "Registro inicial de protocolo de tesis o proyecto.",
+      "costo": "C$ 0.00",
+      "tiempoEstimado": "Varios días",
+      "icono": "🎓"
+    },
+    {
+      "id": "edu35",
+      "categoriaId": "cat_educacion",
+      "titulo": "Solvencia de Biblioteca",
+      "entidad": "UNAN-León",
+      "descripcion": "Constancia de no tener deudas bibliotecarias.",
+      "costo": "C$ 0.00",
+      "tiempoEstimado": "Inmediato",
+      "icono": "🎓"
+    },
+    {
+      "id": "edu36",
+      "categoriaId": "cat_educacion",
+      "titulo": "Inscripción de Título de Bachiller",
+      "entidad": "MINED",
+      "descripcion": "Registro y validación de título de secundaria.",
+      "costo": "C$ 0.00",
+      "tiempoEstimado": "Varios días",
+      "icono": "🎓"
+    },
+    {
+      "id": "edu37",
+      "categoriaId": "cat_educacion",
+      "titulo": "Auténtica de Notas de Secundaria",
+      "entidad": "MINED",
+      "descripcion": "Validación oficial de certificado de notas.",
+      "costo": "C$ 0.00",
+      "tiempoEstimado": "Varios días",
+      "icono": "🎓"
+    },
+    {
+      "id": "edu38",
+      "categoriaId": "cat_educacion",
+      "titulo": "Trámite de Graduación y Emisión de Título Universitario",
+      "entidad": "UNAN-León",
+      "descripcion": "Proceso final de titulación académica.",
+      "costo": "Variable (C$ 1,500 - 2,000)",
+      "tiempoEstimado": "Varios días",
+      "icono": "🎓"
+    },
+    {
+      "id": "edu39",
+      "categoriaId": "cat_educacion",
+      "titulo": "Reposición de Carnet Universitario",
+      "entidad": "UNAN-León",
+      "descripcion": "Emisión de nuevo carnet por pérdida o daño.",
+      "costo": "C$ 100.00",
+      "tiempoEstimado": "Inmediato",
+      "icono": "🎓"
+    },
+    {
+      "id": "edu40",
+      "categoriaId": "cat_educacion",
+      "titulo": "Constancia de Egresado",
+      "entidad": "UNAN-León",
+      "descripcion": "Certificación de haber culminado planes de estudio.",
+      "costo": "C$ 50.00",
+      "tiempoEstimado": "2-3 días",
+      "icono": "🎓"
+    }
   ],
   "requisitos": [
-    { "id": "r1_1", "tramiteId": "ced1", "descripcion": "Certificado de Nacimiento original", "esTramitePrevio": true, "nota": "Actualizado" },
-    { "id": "r1_2", "tramiteId": "ced1", "descripcion": "Fotocopia cédula de un testigo", "esTramitePrevio": false, "nota": "Padre o Madre" },
-    { "id": "r4_1", "tramiteId": "pas1", "descripcion": "Minuta de pago Banpro/Bancentro", "esTramitePrevio": false, "nota": "C$ 800.00" },
-    { "id": "r4_2", "tramiteId": "pas1", "descripcion": "Formulario de trámite migratorio", "esTramitePrevio": false, "nota": "C$ 50.00" },
-    { "id": "r11_1", "tramiteId": "lic1", "descripcion": "Minuta original de pago", "esTramitePrevio": false, "nota": "C$ 500.00" },
-    { "id": "r11_2", "tramiteId": "lic1", "descripcion": "Examen Psicosomático", "esTramitePrevio": false, "nota": "Cruz Blanca" },
-    { "id": "r21_1", "tramiteId": "ruc1", "descripcion": "Cédula de identidad original", "esTramitePrevio": false },
-    { "id": "r21_2", "tramiteId": "ruc1", "descripcion": "Recibo de servicio público del local", "esTramitePrevio": false },
-    { "id": "r31_1", "tramiteId": "edu1", "descripcion": "Certificado de calificaciones completo", "esTramitePrevio": true },
-    { "id": "r31_2", "tramiteId": "edu1", "descripcion": "Solvencia de biblioteca y financiera", "esTramitePrevio": true }
+    {
+      "id": "r1_1",
+      "tramiteId": "ced1",
+      "descripcion": "Certificado de Nacimiento original actualizado",
+      "esTramitePrevio": true,
+      "nota": "Alcaldía"
+    },
+    {
+      "id": "r1_2",
+      "tramiteId": "ced1",
+      "descripcion": "Fotocopia de la cédula de identidad de un testigo (padre, madre o hermano mayor)",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r1_3",
+      "tramiteId": "ced1",
+      "descripcion": "Presencia física del solicitante",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r2_1",
+      "tramiteId": "ced2",
+      "descripcion": "Minuta de pago original del banco",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r2_2",
+      "tramiteId": "ced2",
+      "descripcion": "Denuncia policial por pérdida o robo original",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r3_1",
+      "tramiteId": "ced3",
+      "descripcion": "Minuta de pago original del banco",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r3_2",
+      "tramiteId": "ced3",
+      "descripcion": "Cédula de identidad vencida (física)",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r4_1",
+      "tramiteId": "pas4",
+      "descripcion": "Minuta de pago original",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r4_2",
+      "tramiteId": "pas4",
+      "descripcion": "Formulario de trámite migratorio",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r4_3",
+      "tramiteId": "pas4",
+      "descripcion": "Certificado de Nacimiento original y actualizado",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r4_4",
+      "tramiteId": "pas4",
+      "descripcion": "Cédula de identidad original y copia ampliada",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r5_1",
+      "tramiteId": "pas5",
+      "descripcion": "Minuta de pago original",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r5_2",
+      "tramiteId": "pas5",
+      "descripcion": "Formulario de trámite migratorio",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r5_3",
+      "tramiteId": "pas5",
+      "descripcion": "Pasaporte anterior original y fotocopia de la hoja de datos",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r5_4",
+      "tramiteId": "pas5",
+      "descripcion": "Cédula de identidad original y copia ampliada",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r6_1",
+      "tramiteId": "rec6",
+      "descripcion": "Minuta original de pago en banco o pago en línea",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r6_2",
+      "tramiteId": "rec6",
+      "descripcion": "Cédula de Identidad original vigente",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r7_1",
+      "tramiteId": "mov7",
+      "descripcion": "Carta de solicitud dirigida al Director(a) de Migración",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r7_2",
+      "tramiteId": "mov7",
+      "descripcion": "Cédula de identidad original y fotocopia",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r7_3",
+      "tramiteId": "mov7",
+      "descripcion": "Recibo de pago de arancel de caja",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r8_1",
+      "tramiteId": "nac8",
+      "descripcion": "Recibo de caja de la Alcaldía",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r8_2",
+      "tramiteId": "nac8",
+      "descripcion": "Copia de un certificado de nacimiento anterior o datos exactos de inscripción (Tomo, Folio, Partida)",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r8_3",
+      "tramiteId": "nac8",
+      "descripcion": "Cédula de identidad del solicitante",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r9_1",
+      "tramiteId": "mat9",
+      "descripcion": "Recibo de caja de la Alcaldía",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r9_2",
+      "tramiteId": "mat9",
+      "descripcion": "Fotocopia de la cédula de uno o ambos cónyuges",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r9_3",
+      "tramiteId": "mat9",
+      "descripcion": "Copia del Acta de Matrimonio original entregada por el notario (si es inscripción reciente)",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r10_1",
+      "tramiteId": "def10",
+      "descripcion": "Constancia original de defunción emitida por el MINSA o médico forense",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r10_2",
+      "tramiteId": "def10",
+      "descripcion": "Fotocopia de cédula del difunto (si la hay)",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r10_3",
+      "tramiteId": "def10",
+      "descripcion": "Fotocopia de cédula del familiar informante",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r11_1",
+      "tramiteId": "lic11",
+      "descripcion": "Minuta original del pago en el banco",
+      "esTramitePrevio": false,
+      "nota": "Banpro (C$ 500.00)"
+    },
+    {
+      "id": "r11_2",
+      "tramiteId": "lic11",
+      "descripcion": "Cédula de identidad original y fotocopia",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r11_3",
+      "tramiteId": "lic11",
+      "descripcion": "Examen Psicosomático (Cruz Blanca o Clínica autorizada)",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r11_4",
+      "tramiteId": "lic11",
+      "descripcion": "Certificado de aprobación de Seminario de Educación Vial",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r11_5",
+      "tramiteId": "lic11",
+      "descripcion": "Certificado policial de no poseer antecedentes de tránsito",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r12_1",
+      "tramiteId": "lic12",
+      "descripcion": "Minuta original del pago en el banco",
+      "esTramitePrevio": false,
+      "nota": "C$ 500.00"
+    },
+    {
+      "id": "r12_2",
+      "tramiteId": "lic12",
+      "descripcion": "Licencia de conducir física vencida",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r12_3",
+      "tramiteId": "lic12",
+      "descripcion": "Cédula de identidad original",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r12_4",
+      "tramiteId": "lic12",
+      "descripcion": "Examen Psicosomático (Cruz Blanca o Clínica autorizada)",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r13_1",
+      "tramiteId": "lic13",
+      "descripcion": "Minuta original del pago en el banco",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r13_2",
+      "tramiteId": "lic13",
+      "descripcion": "Denuncia policial original",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r13_3",
+      "tramiteId": "lic13",
+      "descripcion": "Cédula de identidad original y copia",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r14_1",
+      "tramiteId": "mul14",
+      "descripcion": "Boleta de infracción de tránsito original",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r14_2",
+      "tramiteId": "mul14",
+      "descripcion": "Cédula de identidad original",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r15_1",
+      "tramiteId": "sti15",
+      "descripcion": "Fotocopia de la tarjeta de circulación del vehículo",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r15_2",
+      "tramiteId": "sti15",
+      "descripcion": "Fotocopia de la Cédula de Identidad del propietario",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r16_1",
+      "tramiteId": "cir16",
+      "descripcion": "Minuta de pago del impuesto del 1% (DGI o Alcaldía)",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r16_2",
+      "tramiteId": "cir16",
+      "descripcion": "Factura comercial original o póliza de importación",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r16_3",
+      "tramiteId": "cir16",
+      "descripcion": "Certificado de inspección física (DIE)",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r16_4",
+      "tramiteId": "cir16",
+      "descripcion": "Seguro obligatorio de responsabilidad civil vigente",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r16_5",
+      "tramiteId": "cir16",
+      "descripcion": "Cédula original y copia",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r17_1",
+      "tramiteId": "tra17",
+      "descripcion": "Escritura pública de compra-venta elaborada por un notario",
+      "esTramitePrevio": true,
+      "nota": "Notariada"
+    },
+    {
+      "id": "r17_2",
+      "tramiteId": "tra17",
+      "descripcion": "Tarjeta de circulación original del dueño anterior",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r17_3",
+      "tramiteId": "tra17",
+      "descripcion": "Certificado de inspección física (DIE)",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r17_4",
+      "tramiteId": "tra17",
+      "descripcion": "Minuta de pago del impuesto de traspaso (1%)",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r17_5",
+      "tramiteId": "tra17",
+      "descripcion": "Copia de cédula del comprador y vendedor",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r18_1",
+      "tramiteId": "ins18",
+      "descripcion": "Tarjeta de circulación vehicular original",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r18_2",
+      "tramiteId": "ins18",
+      "descripcion": "Vehículo físicamente en el lugar",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r18_3",
+      "tramiteId": "ins18",
+      "descripcion": "Pago del servicio en la caja del taller",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r19_1",
+      "tramiteId": "gas19",
+      "descripcion": "Tarjeta de circulación vehicular original",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r19_2",
+      "tramiteId": "gas19",
+      "descripcion": "Vehículo encendido y operativo",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r19_3",
+      "tramiteId": "gas19",
+      "descripcion": "Pago del servicio",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r20_1",
+      "tramiteId": "pla20",
+      "descripcion": "Minuta de pago bancario",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r20_2",
+      "tramiteId": "pla20",
+      "descripcion": "Denuncia policial o entrega de la placa vieja",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r20_3",
+      "tramiteId": "pla20",
+      "descripcion": "Tarjeta de circulación original",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r20_4",
+      "tramiteId": "pla20",
+      "descripcion": "Cédula de identidad original y copia",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r21_1",
+      "tramiteId": "neg21",
+      "descripcion": "Cédula de identidad original y copia",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r21_2",
+      "tramiteId": "neg21",
+      "descripcion": "Recibo de servicios públicos (agua o luz) del local comercial",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r21_3",
+      "tramiteId": "neg21",
+      "descripcion": "Formulario de inscripción lleno",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r22_1",
+      "tramiteId": "neg22",
+      "descripcion": "Cédula de identidad original y copia",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r22_2",
+      "tramiteId": "neg22",
+      "descripcion": "Recibo de servicios públicos (agua o luz)",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r22_3",
+      "tramiteId": "neg22",
+      "descripcion": "Acta constitutiva y estatutos (si es una Sociedad Anónima)",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r22_4",
+      "tramiteId": "neg22",
+      "descripcion": "Poder general de administración (para representante legal)",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r23_1",
+      "tramiteId": "neg23",
+      "descripcion": "Cédula de identidad original y copia",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r23_2",
+      "tramiteId": "neg23",
+      "descripcion": "Constancia del RUC emitida por la DGI",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r23_3",
+      "tramiteId": "neg23",
+      "descripcion": "Contrato de arriendo o escritura de la propiedad del local",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r23_4",
+      "tramiteId": "neg23",
+      "descripcion": "Constancia de Uso de Suelo (aprobada por Urbanismo)",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r24_1",
+      "tramiteId": "neg24",
+      "descripcion": "Certificado de Matrícula Municipal del año anterior",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r24_2",
+      "tramiteId": "neg24",
+      "descripcion": "Declaración de ingresos (definitiva) sellada por la DGI",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r24_3",
+      "tramiteId": "neg24",
+      "descripcion": "Solvencia Municipal vigente",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r24_4",
+      "tramiteId": "neg24",
+      "descripcion": "Cédula de identidad",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r25_1",
+      "tramiteId": "neg25",
+      "descripcion": "Constancia del RUC (DGI)",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r25_2",
+      "tramiteId": "neg25",
+      "descripcion": "Cédula de identidad del empleador o representante legal",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r25_3",
+      "tramiteId": "neg25",
+      "descripcion": "Matrícula de la Alcaldía",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r25_4",
+      "tramiteId": "neg25",
+      "descripcion": "Formulario de inscripción patronal sellado y firmado",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r26_1",
+      "tramiteId": "neg26",
+      "descripcion": "Cédula de identidad original",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r26_2",
+      "tramiteId": "neg26",
+      "descripcion": "2 fotografías tamaño carnet",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r26_3",
+      "tramiteId": "neg26",
+      "descripcion": "Muestras para exámenes de laboratorio (heces, orina, sangre según requerimiento)",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r27_1",
+      "tramiteId": "neg27",
+      "descripcion": "Constancia del RUC",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r27_2",
+      "tramiteId": "neg27",
+      "descripcion": "Copia de la Matrícula de la Alcaldía",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r27_3",
+      "tramiteId": "neg27",
+      "descripcion": "Certificados de salud vigentes de todos los trabajadores",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r27_4",
+      "tramiteId": "neg27",
+      "descripcion": "Plan de manejo de desechos sólidos",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r28_1",
+      "tramiteId": "neg28",
+      "descripcion": "Carta formal solicitando la inspección del local",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r28_2",
+      "tramiteId": "neg28",
+      "descripcion": "Copia de Cédula y RUC",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r28_3",
+      "tramiteId": "neg28",
+      "descripcion": "Extintores recargados y vigentes físicamente en el local",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r28_4",
+      "tramiteId": "neg28",
+      "descripcion": "Señalización de rutas de evacuación",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r29_1",
+      "tramiteId": "neg29",
+      "descripcion": "Diseño del logotipo de la marca impreso y digital",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r29_2",
+      "tramiteId": "neg29",
+      "descripcion": "Formulario de solicitud del Registro de Propiedad Intelectual",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r29_3",
+      "tramiteId": "neg29",
+      "descripcion": "Recibos de pago de aranceles",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r29_4",
+      "tramiteId": "neg29",
+      "descripcion": "Poder notarial (si el trámite lo hace un abogado)",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r30_1",
+      "tramiteId": "neg30",
+      "descripcion": "Cédula de identidad del titular o representante",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r30_2",
+      "tramiteId": "neg30",
+      "descripcion": "Estar al día con los pagos de IBI, basura y matrícula anual",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r31_1",
+      "tramiteId": "edu31",
+      "descripcion": "Carnet de estudiante universitario vigente",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r31_2",
+      "tramiteId": "edu31",
+      "descripcion": "Recibo de pago de caja de la universidad",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r32_1",
+      "tramiteId": "edu32",
+      "descripcion": "Estar debidamente matriculado en el semestre/año lectivo actual",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r32_2",
+      "tramiteId": "edu32",
+      "descripcion": "Carnet de estudiante universitario",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r32_3",
+      "tramiteId": "edu32",
+      "descripcion": "Recibo de pago de caja",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r33_1",
+      "tramiteId": "edu33",
+      "descripcion": "Formato de retiro de asignatura oficial",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r33_2",
+      "tramiteId": "edu33",
+      "descripcion": "Firma de aprobación del docente titular de la clase",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r33_3",
+      "tramiteId": "edu33",
+      "descripcion": "Carnet de estudiante",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r34_1",
+      "tramiteId": "edu34",
+      "descripcion": "Carta de solicitud formal dirigida al coordinador de carrera o jefe de departamento",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r34_2",
+      "tramiteId": "edu34",
+      "descripcion": "Ficha técnica o protocolo del proyecto",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r34_3",
+      "tramiteId": "edu34",
+      "descripcion": "Firmas de todos los estudiantes integrantes del equipo",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r35_1",
+      "tramiteId": "edu35",
+      "descripcion": "Carnet de estudiante",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r35_2",
+      "tramiteId": "edu35",
+      "descripcion": "Haber devuelto todo el material bibliográfico prestado",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r35_3",
+      "tramiteId": "edu35",
+      "descripcion": "Recibo de pago de multas (solo si aplica)",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r36_1",
+      "tramiteId": "edu36",
+      "descripcion": "Título de Bachiller original",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r36_2",
+      "tramiteId": "edu36",
+      "descripcion": "Fotocopia tamaño carta del título",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r36_3",
+      "tramiteId": "edu36",
+      "descripcion": "Cédula de identidad (o partida de nacimiento si es menor de edad)",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r37_1",
+      "tramiteId": "edu37",
+      "descripcion": "Certificado de notas original (de 1er a 5to año)",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r37_2",
+      "tramiteId": "edu37",
+      "descripcion": "Cédula de identidad original y copia",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r37_3",
+      "tramiteId": "edu37",
+      "descripcion": "Sello y firma original del director del colegio en el certificado",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r38_1",
+      "tramiteId": "edu38",
+      "descripcion": "Hoja de recorrido de Solvencias",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r38_2",
+      "tramiteId": "edu38",
+      "descripcion": "Certificado de Calificaciones de toda la carrera",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r38_3",
+      "tramiteId": "edu38",
+      "descripcion": "Acta de defensa de monografía o examen de grado aprobada",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r38_4",
+      "tramiteId": "edu38",
+      "descripcion": "Fotografías tamaño título",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r38_5",
+      "tramiteId": "edu38",
+      "descripcion": "Minutas de pago de derecho a graduación y título",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r39_1",
+      "tramiteId": "edu39",
+      "descripcion": "Minuta de pago de caja por concepto de reposición",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r39_2",
+      "tramiteId": "edu39",
+      "descripcion": "Cédula de identidad original",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r39_3",
+      "tramiteId": "edu39",
+      "descripcion": "Hoja de matrícula activa",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r40_1",
+      "tramiteId": "edu40",
+      "descripcion": "Haber culminado y aprobado el plan de estudio completo de la carrera",
+      "esTramitePrevio": true
+    },
+    {
+      "id": "r40_2",
+      "tramiteId": "edu40",
+      "descripcion": "Recibo de pago de caja",
+      "esTramitePrevio": false
+    },
+    {
+      "id": "r40_3",
+      "tramiteId": "edu40",
+      "descripcion": "Cédula de identidad",
+      "esTramitePrevio": false
+    }
   ],
   "pasos": [
-    { "id": "p1_1", "tramiteId": "ced1", "orden": 1, "descripcion": "Acudir a delegación de Cedulación (CSE)." },
-    { "id": "p1_2", "tramiteId": "ced1", "orden": 2, "descripcion": "Presentar requisitos y tomar fotografía." },
-    { "id": "p11_1", "tramiteId": "lic1", "orden": 1, "descripcion": "Pagar arancel en el banco y aprobar exámenes médicos." },
-    { "id": "p11_2", "tramiteId": "lic1", "orden": 2, "descripcion": "Asistir a seminario y aprobar exámenes de manejo." },
-    { "id": "p21_1", "tramiteId": "ruc1", "orden": 1, "descripcion": "Presentarse en la administración de rentas (DGI)." },
-    { "id": "p31_1", "tramiteId": "edu1", "orden": 1, "descripcion": "Realizar hoja de recorrido y pagar derecho a título." }
+    {
+      "id": "p1_1",
+      "tramiteId": "ced1",
+      "orden": 1,
+      "descripcion": "Acudir a la delegación departamental o municipal de Cedulación (CSE)."
+    },
+    {
+      "id": "p1_2",
+      "tramiteId": "ced1",
+      "orden": 2,
+      "descripcion": "Presentar el Certificado de Nacimiento junto con el testigo."
+    },
+    {
+      "id": "p1_3",
+      "tramiteId": "ced1",
+      "orden": 3,
+      "descripcion": "Pasar a la toma de fotografía digital y firma."
+    },
+    {
+      "id": "p1_4",
+      "tramiteId": "ced1",
+      "orden": 4,
+      "descripcion": "Retirar la colilla de solicitud."
+    },
+    {
+      "id": "p1_5",
+      "tramiteId": "ced1",
+      "orden": 5,
+      "descripcion": "Regresar en la fecha indicada para retirar la cédula física."
+    },
+    {
+      "id": "p2_1",
+      "tramiteId": "ced2",
+      "orden": 1,
+      "descripcion": "Interponer la denuncia de pérdida en la delegación de la Policía Nacional."
+    },
+    {
+      "id": "p2_2",
+      "tramiteId": "ced2",
+      "orden": 2,
+      "descripcion": "Depositar C$ 300.00 en Banpro o Bancentro en la cuenta del CSE."
+    },
+    {
+      "id": "p2_3",
+      "tramiteId": "ced2",
+      "orden": 3,
+      "descripcion": "Presentarse a la delegación de Cedulación con la minuta y la denuncia."
+    },
+    {
+      "id": "p2_4",
+      "tramiteId": "ced2",
+      "orden": 4,
+      "descripcion": "Toma de nueva fotografía (opcional si quieren actualizarla)."
+    },
+    {
+      "id": "p2_5",
+      "tramiteId": "ced2",
+      "orden": 5,
+      "descripcion": "Retirar la nueva cédula en la fecha indicada."
+    },
+    {
+      "id": "p3_1",
+      "tramiteId": "ced3",
+      "orden": 1,
+      "descripcion": "Depositar C$ 300.00 en Banpro o Bancentro en la cuenta del CSE."
+    },
+    {
+      "id": "p3_2",
+      "tramiteId": "ced3",
+      "orden": 2,
+      "descripcion": "Presentarse a la delegación de Cedulación."
+    },
+    {
+      "id": "p3_3",
+      "tramiteId": "ced3",
+      "orden": 3,
+      "descripcion": "Entregar la minuta y la cédula vieja al funcionario."
+    },
+    {
+      "id": "p3_4",
+      "tramiteId": "ced3",
+      "orden": 4,
+      "descripcion": "Toma de fotografía y huellas."
+    },
+    {
+      "id": "p3_5",
+      "tramiteId": "ced3",
+      "orden": 5,
+      "descripcion": "Retirar la cédula renovada."
+    },
+    {
+      "id": "p4_1",
+      "tramiteId": "pas4",
+      "orden": 1,
+      "descripcion": "Pagar C$ 750.00 en caja de la DGME o Banpro y comprar el formulario de C$ 50.00."
+    },
+    {
+      "id": "p4_2",
+      "tramiteId": "pas4",
+      "orden": 2,
+      "descripcion": "Agendar cita obligatoria a través del portal web de citas de Migración."
+    },
+    {
+      "id": "p4_3",
+      "tramiteId": "pas4",
+      "orden": 3,
+      "descripcion": "Acudir el día de la cita a SERTRAMI con todos los papeles."
+    },
+    {
+      "id": "p4_4",
+      "tramiteId": "pas4",
+      "orden": 4,
+      "descripcion": "Pasar a toma de fotografía, firma y huellas dactilares."
+    },
+    {
+      "id": "p4_5",
+      "tramiteId": "pas4",
+      "orden": 5,
+      "descripcion": "Retirar pasaporte en 8 días hábiles."
+    },
+    {
+      "id": "p5_1",
+      "tramiteId": "pas5",
+      "orden": 1,
+      "descripcion": "Realizar el pago de aranceles y formulario."
+    },
+    {
+      "id": "p5_2",
+      "tramiteId": "pas5",
+      "orden": 2,
+      "descripcion": "Agendar cita en el sistema en línea."
+    },
+    {
+      "id": "p5_3",
+      "tramiteId": "pas5",
+      "orden": 3,
+      "descripcion": "Presentarse en SERTRAMI el día acordado."
+    },
+    {
+      "id": "p5_4",
+      "tramiteId": "pas5",
+      "orden": 4,
+      "descripcion": "Entregar el pasaporte viejo para que sea anulado junto con los demás requisitos."
+    },
+    {
+      "id": "p5_5",
+      "tramiteId": "pas5",
+      "orden": 5,
+      "descripcion": "Retirar la nueva libreta de pasaporte."
+    },
+    {
+      "id": "p6_1",
+      "tramiteId": "rec6",
+      "orden": 1,
+      "descripcion": "Pagar C$ 30.00 en Banpro o usar el pago directo en los Kioscos Tecnológicos."
+    },
+    {
+      "id": "p6_2",
+      "tramiteId": "rec6",
+      "orden": 2,
+      "descripcion": "Presentar la cédula de identidad en ventanilla policial o escanearla en el Kiosco."
+    },
+    {
+      "id": "p6_3",
+      "tramiteId": "rec6",
+      "orden": 3,
+      "descripcion": "El sistema verificará el historial del ciudadano."
+    },
+    {
+      "id": "p6_4",
+      "tramiteId": "rec6",
+      "orden": 4,
+      "descripcion": "Esperar la impresión inmediata del certificado."
+    },
+    {
+      "id": "p7_1",
+      "tramiteId": "mov7",
+      "orden": 1,
+      "descripcion": "Redactar una carta formal solicitando el historial de entradas y salidas del país, explicando el motivo."
+    },
+    {
+      "id": "p7_2",
+      "tramiteId": "mov7",
+      "orden": 2,
+      "descripcion": "Pagar el arancel en las cajas de la DGME."
+    },
+    {
+      "id": "p7_3",
+      "tramiteId": "mov7",
+      "orden": 3,
+      "descripcion": "Entregar la carta, la copia de cédula y el recibo en ventanilla de recepción."
+    },
+    {
+      "id": "p7_4",
+      "tramiteId": "mov7",
+      "orden": 4,
+      "descripcion": "Retirar el documento certificado en 3 a 5 días hábiles."
+    },
+    {
+      "id": "p8_1",
+      "tramiteId": "nac8",
+      "orden": 1,
+      "descripcion": "Ir al área de caja de la Alcaldía de su municipio."
+    },
+    {
+      "id": "p8_2",
+      "tramiteId": "nac8",
+      "orden": 2,
+      "descripcion": "Pagar el arancel correspondiente a Certificado de Nacimiento."
+    },
+    {
+      "id": "p8_3",
+      "tramiteId": "nac8",
+      "orden": 3,
+      "descripcion": "Dirigirse a las ventanillas del Registro Civil y entregar el recibo con los datos de búsqueda."
+    },
+    {
+      "id": "p8_4",
+      "tramiteId": "nac8",
+      "orden": 4,
+      "descripcion": "Retirar el certificado firmado y sellado por el Registrador."
+    },
+    {
+      "id": "p9_1",
+      "tramiteId": "mat9",
+      "orden": 1,
+      "descripcion": "Si es inscripción nueva, presentar el acta del notario en el Registro Civil."
+    },
+    {
+      "id": "p9_2",
+      "tramiteId": "mat9",
+      "orden": 2,
+      "descripcion": "Si es solo copia, ir a caja, pagar el arancel y solicitar el certificado de matrimonio con los nombres de la pareja."
+    },
+    {
+      "id": "p9_3",
+      "tramiteId": "mat9",
+      "orden": 3,
+      "descripcion": "Retirar el certificado oficial."
+    },
+    {
+      "id": "p10_1",
+      "tramiteId": "def10",
+      "orden": 1,
+      "descripcion": "Llevar la constancia del MINSA al Registro Civil en un plazo máximo indicado por la ley."
+    },
+    {
+      "id": "p10_2",
+      "tramiteId": "def10",
+      "orden": 2,
+      "descripcion": "Realizar la inscripción en los libros y pagar el arancel de emisión del certificado en caja."
+    },
+    {
+      "id": "p10_3",
+      "tramiteId": "def10",
+      "orden": 3,
+      "descripcion": "Retirar el Certificado de Defunción firmado y sellado."
+    },
+    {
+      "id": "p11_1",
+      "tramiteId": "lic11",
+      "orden": 1,
+      "descripcion": "Realizar el pago de C$ 500.00 en Banpro a nombre de la Policía Nacional."
+    },
+    {
+      "id": "p11_2",
+      "tramiteId": "lic11",
+      "orden": 2,
+      "descripcion": "Aprobar el examen psicosomático en centro autorizado."
+    },
+    {
+      "id": "p11_3",
+      "tramiteId": "lic11",
+      "orden": 3,
+      "descripcion": "Recibir y aprobar el seminario de educación vial."
+    },
+    {
+      "id": "p11_4",
+      "tramiteId": "lic11",
+      "orden": 4,
+      "descripcion": "Aprobar exámenes teórico y práctico de manejo en Tránsito Nacional."
+    },
+    {
+      "id": "p11_5",
+      "tramiteId": "lic11",
+      "orden": 5,
+      "descripcion": "Pasar a ventanilla para toma de foto y entrega de licencia."
+    },
+    {
+      "id": "p12_1",
+      "tramiteId": "lic12",
+      "orden": 1,
+      "descripcion": "Realizar el pago de renovación en Banpro."
+    },
+    {
+      "id": "p12_2",
+      "tramiteId": "lic12",
+      "orden": 2,
+      "descripcion": "Realizar el examen psicosomático y asegurar que se suba al sistema."
+    },
+    {
+      "id": "p12_3",
+      "tramiteId": "lic12",
+      "orden": 3,
+      "descripcion": "Presentarse a la delegación de Tránsito con la minuta, licencia vieja y cédula."
+    },
+    {
+      "id": "p12_4",
+      "tramiteId": "lic12",
+      "orden": 4,
+      "descripcion": "Esperar llamado en ventanilla para toma de fotografía."
+    },
+    {
+      "id": "p12_5",
+      "tramiteId": "lic12",
+      "orden": 5,
+      "descripcion": "Retirar la licencia renovada."
+    },
+    {
+      "id": "p13_1",
+      "tramiteId": "lic13",
+      "orden": 1,
+      "descripcion": "Interponer denuncia por pérdida en la delegación policial más cercana."
+    },
+    {
+      "id": "p13_2",
+      "tramiteId": "lic13",
+      "orden": 2,
+      "descripcion": "Pagar el arancel de reposición en ventanillas bancarias."
+    },
+    {
+      "id": "p13_3",
+      "tramiteId": "lic13",
+      "orden": 3,
+      "descripcion": "Acudir a Tránsito Nacional y entregar requisitos."
+    },
+    {
+      "id": "p13_4",
+      "tramiteId": "lic13",
+      "orden": 4,
+      "descripcion": "Verificación en el sistema de multas."
+    },
+    {
+      "id": "p13_5",
+      "tramiteId": "lic13",
+      "orden": 5,
+      "descripcion": "Toma de fotografía y entrega de la nueva impresión de licencia."
+    },
+    {
+      "id": "p14_1",
+      "tramiteId": "mul14",
+      "orden": 1,
+      "descripcion": "Recibir la boleta de infracción por parte del oficial."
+    },
+    {
+      "id": "p14_2",
+      "tramiteId": "mul14",
+      "orden": 2,
+      "descripcion": "Acudir a un kiosco tecnológico de la Policía o a una sucursal de Banpro."
+    },
+    {
+      "id": "p14_3",
+      "tramiteId": "mul14",
+      "orden": 3,
+      "descripcion": "Digitar el número de boleta y realizar el pago."
+    },
+    {
+      "id": "p14_4",
+      "tramiteId": "mul14",
+      "orden": 4,
+      "descripcion": "Si la licencia fue retenida, regresar a la delegación de Tránsito con el recibo de pago para recuperarla."
+    },
+    {
+      "id": "p15_1",
+      "tramiteId": "sti15",
+      "orden": 1,
+      "descripcion": "Acudir a las cajas habilitadas por la Alcaldía (generalmente de enero a marzo)."
+    },
+    {
+      "id": "p15_2",
+      "tramiteId": "sti15",
+      "orden": 2,
+      "descripcion": "Entregar las fotocopias de circulación y cédula al cajero."
+    },
+    {
+      "id": "p15_3",
+      "tramiteId": "sti15",
+      "orden": 3,
+      "descripcion": "Pagar el arancel correspondiente a la categoría del vehículo."
+    },
+    {
+      "id": "p15_4",
+      "tramiteId": "sti15",
+      "orden": 4,
+      "descripcion": "Recibir el recibo oficial y el sticker o viñeta adhesiva."
+    },
+    {
+      "id": "p16_1",
+      "tramiteId": "cir16",
+      "orden": 1,
+      "descripcion": "Comprar el seguro obligatorio."
+    },
+    {
+      "id": "p16_2",
+      "tramiteId": "cir16",
+      "orden": 2,
+      "descripcion": "Llevar el vehículo a inspección física policial (revisión de motor/chasis)."
+    },
+    {
+      "id": "p16_3",
+      "tramiteId": "cir16",
+      "orden": 3,
+      "descripcion": "Pagar el 1% de matrícula inicial."
+    },
+    {
+      "id": "p16_4",
+      "tramiteId": "cir16",
+      "orden": 4,
+      "descripcion": "Presentar el expediente completo en ventanilla de Registro Vehicular."
+    },
+    {
+      "id": "p16_5",
+      "tramiteId": "cir16",
+      "orden": 5,
+      "descripcion": "Retirar placas metálicas y tarjeta de circulación."
+    },
+    {
+      "id": "p17_1",
+      "tramiteId": "tra17",
+      "orden": 1,
+      "descripcion": "Realizar la escritura de compra-venta con un abogado/notario."
+    },
+    {
+      "id": "p17_2",
+      "tramiteId": "tra17",
+      "orden": 2,
+      "descripcion": "Llevar el vehículo a inspección física para verificar número de chasis y motor."
+    },
+    {
+      "id": "p17_3",
+      "tramiteId": "tra17",
+      "orden": 3,
+      "descripcion": "Pagar el impuesto de traspaso en la Alcaldía/DGI."
+    },
+    {
+      "id": "p17_4",
+      "tramiteId": "tra17",
+      "orden": 4,
+      "descripcion": "Acudir a Tránsito Nacional, entregar placas y documentos."
+    },
+    {
+      "id": "p17_5",
+      "tramiteId": "tra17",
+      "orden": 5,
+      "descripcion": "Recibir nueva circulación a nombre del comprador."
+    },
+    {
+      "id": "p18_1",
+      "tramiteId": "ins18",
+      "orden": 1,
+      "descripcion": "Llevar el vehículo a un taller automotriz acreditado por Tránsito Nacional."
+    },
+    {
+      "id": "p18_2",
+      "tramiteId": "ins18",
+      "orden": 2,
+      "descripcion": "Pagar en caja el costo del servicio."
+    },
+    {
+      "id": "p18_3",
+      "tramiteId": "ins18",
+      "orden": 3,
+      "descripcion": "El mecánico autorizado inspeccionará sistema de frenos, dirección, luces y llantas."
+    },
+    {
+      "id": "p18_4",
+      "tramiteId": "ins18",
+      "orden": 4,
+      "descripcion": "Si aprueba, se emite el certificado impreso y se entrega una viñeta adhesiva."
+    },
+    {
+      "id": "p19_1",
+      "tramiteId": "gas19",
+      "orden": 1,
+      "descripcion": "Presentarse en el taller autorizado."
+    },
+    {
+      "id": "p19_2",
+      "tramiteId": "gas19",
+      "orden": 2,
+      "descripcion": "Abonar el arancel del examen de emisiones."
+    },
+    {
+      "id": "p19_3",
+      "tramiteId": "gas19",
+      "orden": 3,
+      "descripcion": "Se introduce una sonda en el escape del vehículo para medir los niveles de monóxido de carbono."
+    },
+    {
+      "id": "p19_4",
+      "tramiteId": "gas19",
+      "orden": 4,
+      "descripcion": "Si los niveles están dentro de la norma, se entrega el certificado aprobado."
+    },
+    {
+      "id": "p20_1",
+      "tramiteId": "pla20",
+      "orden": 1,
+      "descripcion": "Interponer la denuncia en la Policía si una o ambas placas fueron robadas/perdidas."
+    },
+    {
+      "id": "p20_2",
+      "tramiteId": "pla20",
+      "orden": 2,
+      "descripcion": "Si es por deterioro, llevar las placas viejas."
+    },
+    {
+      "id": "p20_3",
+      "tramiteId": "pla20",
+      "orden": 3,
+      "descripcion": "Pagar el arancel de reposición en el banco."
+    },
+    {
+      "id": "p20_4",
+      "tramiteId": "pla20",
+      "orden": 4,
+      "descripcion": "Presentar los documentos en Registro Vehicular."
+    },
+    {
+      "id": "p20_5",
+      "tramiteId": "pla20",
+      "orden": 5,
+      "descripcion": "Recibir las nuevas placas asignadas y una nueva circulación."
+    },
+    {
+      "id": "p21_1",
+      "tramiteId": "neg21",
+      "orden": 1,
+      "descripcion": "Presentarse en la Administración de Rentas de la DGI más cercana."
+    },
+    {
+      "id": "p21_2",
+      "tramiteId": "neg21",
+      "orden": 2,
+      "descripcion": "Llenar y entregar el formulario de inscripción."
+    },
+    {
+      "id": "p21_3",
+      "tramiteId": "neg21",
+      "orden": 3,
+      "descripcion": "Esperar la visita de un inspector de la DGI al local para verificar el inventario y características."
+    },
+    {
+      "id": "p21_4",
+      "tramiteId": "neg21",
+      "orden": 4,
+      "descripcion": "Acudir a la DGI para retirar la constancia de inscripción con el Número RUC."
+    },
+    {
+      "id": "p22_1",
+      "tramiteId": "neg22",
+      "orden": 1,
+      "descripcion": "Presentar los documentos legales y personales en la ventanilla de la DGI."
+    },
+    {
+      "id": "p22_2",
+      "tramiteId": "neg22",
+      "orden": 2,
+      "descripcion": "Registrar las firmas autorizadas."
+    },
+    {
+      "id": "p22_3",
+      "tramiteId": "neg22",
+      "orden": 3,
+      "descripcion": "Obtener la constancia de inscripción con el Número RUC."
+    },
+    {
+      "id": "p22_4",
+      "tramiteId": "neg22",
+      "orden": 4,
+      "descripcion": "Generar credenciales para acceder a la Ventanilla Electrónica Tributaria (VET)."
+    },
+    {
+      "id": "p23_1",
+      "tramiteId": "neg23",
+      "orden": 1,
+      "descripcion": "Dirigirse al área de Rentas de la Alcaldía Municipal."
+    },
+    {
+      "id": "p23_2",
+      "tramiteId": "neg23",
+      "orden": 2,
+      "descripcion": "Llenar el formulario de declaración de apertura."
+    },
+    {
+      "id": "p23_3",
+      "tramiteId": "neg23",
+      "orden": 3,
+      "descripcion": "Pagar el 1% sobre el capital inicial declarado en caja."
+    },
+    {
+      "id": "p23_4",
+      "tramiteId": "neg23",
+      "orden": 4,
+      "descripcion": "Retirar el Certificado de Matrícula Municipal."
+    },
+    {
+      "id": "p24_1",
+      "tramiteId": "neg24",
+      "orden": 1,
+      "descripcion": "Presentar la declaración de ingresos en el área de Recaudación."
+    },
+    {
+      "id": "p24_2",
+      "tramiteId": "neg24",
+      "orden": 2,
+      "descripcion": "El sistema calculará el impuesto anual de matrícula."
+    },
+    {
+      "id": "p24_3",
+      "tramiteId": "neg24",
+      "orden": 3,
+      "descripcion": "Pagar el monto total o suscribir un arreglo de pago."
+    },
+    {
+      "id": "p24_4",
+      "tramiteId": "neg24",
+      "orden": 4,
+      "descripcion": "Retirar el nuevo Certificado de Matrícula actualizado."
+    },
+    {
+      "id": "p25_1",
+      "tramiteId": "neg25",
+      "orden": 1,
+      "descripcion": "Descargar y llenar el formulario de inscripción desde el portal del INSS o en sucursal."
+    },
+    {
+      "id": "p25_2",
+      "tramiteId": "neg25",
+      "orden": 2,
+      "descripcion": "Presentar la documentación legal del negocio en la delegación del INSS correspondiente."
+    },
+    {
+      "id": "p25_3",
+      "tramiteId": "neg25",
+      "orden": 3,
+      "descripcion": "Recibir el Número Patronal asignado."
+    },
+    {
+      "id": "p25_4",
+      "tramiteId": "neg25",
+      "orden": 4,
+      "descripcion": "Acceder al portal en línea para registrar la nómina de trabajadores."
+    },
+    {
+      "id": "p26_1",
+      "tramiteId": "neg26",
+      "orden": 1,
+      "descripcion": "Pagar el arancel en la caja del Centro de Salud de su distrito."
+    },
+    {
+      "id": "p26_2",
+      "tramiteId": "neg26",
+      "orden": 2,
+      "descripcion": "Entregar las muestras en el área de laboratorio clínico a primera hora."
+    },
+    {
+      "id": "p26_3",
+      "tramiteId": "neg26",
+      "orden": 3,
+      "descripcion": "Asistir obligatoriamente a la charla de higiene y manipulación de alimentos."
+    },
+    {
+      "id": "p26_4",
+      "tramiteId": "neg26",
+      "orden": 4,
+      "descripcion": "Retirar el carnet de salud firmado por epidemiología."
+    },
+    {
+      "id": "p27_1",
+      "tramiteId": "neg27",
+      "orden": 1,
+      "descripcion": "Solicitar la inspección higiénico-sanitaria en el SILAIS o Centro de Salud correspondiente."
+    },
+    {
+      "id": "p27_2",
+      "tramiteId": "neg27",
+      "orden": 2,
+      "descripcion": "Recibir a los inspectores del MINSA en el local comercial."
+    },
+    {
+      "id": "p27_3",
+      "tramiteId": "neg27",
+      "orden": 3,
+      "descripcion": "Realizar las correcciones estructurales o de higiene que recomiende el inspector."
+    },
+    {
+      "id": "p27_4",
+      "tramiteId": "neg27",
+      "orden": 4,
+      "descripcion": "Pagar el arancel correspondiente y retirar la Licencia Sanitaria oficial."
+    },
+    {
+      "id": "p28_1",
+      "tramiteId": "neg28",
+      "orden": 1,
+      "descripcion": "Solicitar y pagar la tarifa de inspección en la estación de bomberos más cercana."
+    },
+    {
+      "id": "p28_2",
+      "tramiteId": "neg28",
+      "orden": 2,
+      "descripcion": "Recibir al inspector de prevención de incendios en el negocio."
+    },
+    {
+      "id": "p28_3",
+      "tramiteId": "neg28",
+      "orden": 3,
+      "descripcion": "Cumplir con las normativas observadas."
+    },
+    {
+      "id": "p28_4",
+      "tramiteId": "neg28",
+      "orden": 4,
+      "descripcion": "Retirar el Certificado de Inspección de Bomberos."
+    },
+    {
+      "id": "p29_1",
+      "tramiteId": "neg29",
+      "orden": 1,
+      "descripcion": "Realizar la búsqueda de antecedentes fonéticos y gráficos en el MIFIC."
+    },
+    {
+      "id": "p29_2",
+      "tramiteId": "neg29",
+      "orden": 2,
+      "descripcion": "Presentar la solicitud de registro y pagar el arancel de inscripción."
+    },
+    {
+      "id": "p29_3",
+      "tramiteId": "neg29",
+      "orden": 3,
+      "descripcion": "Publicar el aviso de solicitud en La Gaceta, Diario Oficial."
+    },
+    {
+      "id": "p29_4",
+      "tramiteId": "neg29",
+      "orden": 4,
+      "descripcion": "Esperar el periodo de oposición legal."
+    },
+    {
+      "id": "p29_5",
+      "tramiteId": "neg29",
+      "orden": 5,
+      "descripcion": "Retirar el Título de Concesión de Marca."
+    },
+    {
+      "id": "p30_1",
+      "tramiteId": "neg30",
+      "orden": 1,
+      "descripcion": "Acudir al área de recaudación municipal."
+    },
+    {
+      "id": "p30_2",
+      "tramiteId": "neg30",
+      "orden": 2,
+      "descripcion": "Solicitar un estado de cuenta general a nombre del contribuyente o del negocio."
+    },
+    {
+      "id": "p30_3",
+      "tramiteId": "neg30",
+      "orden": 3,
+      "descripcion": "Cancelar en caja cualquier saldo pendiente o multa existente."
+    },
+    {
+      "id": "p30_4",
+      "tramiteId": "neg30",
+      "orden": 4,
+      "descripcion": "Pagar el valor de emisión de la constancia."
+    },
+    {
+      "id": "p30_5",
+      "tramiteId": "neg30",
+      "orden": 5,
+      "descripcion": "Retirar la Solvencia Municipal firmada y sellada."
+    },
+    {
+      "id": "p31_1",
+      "tramiteId": "edu31",
+      "orden": 1,
+      "descripcion": "Acudir al área de caja y pagar el arancel correspondiente a Certificado de Calificaciones."
+    },
+    {
+      "id": "p31_2",
+      "tramiteId": "edu31",
+      "orden": 2,
+      "descripcion": "Dirigirse a la ventanilla de Registro Académico de su facultad."
+    },
+    {
+      "id": "p31_3",
+      "tramiteId": "edu31",
+      "orden": 3,
+      "descripcion": "Llenar la boleta de solicitud y entregar el recibo de caja."
+    },
+    {
+      "id": "p31_4",
+      "tramiteId": "edu31",
+      "orden": 4,
+      "descripcion": "Retirar el certificado impreso, firmado y sellado."
+    },
+    {
+      "id": "p32_1",
+      "tramiteId": "edu32",
+      "orden": 1,
+      "descripcion": "Realizar el pago del arancel en el área de caja."
+    },
+    {
+      "id": "p32_2",
+      "tramiteId": "edu32",
+      "orden": 2,
+      "descripcion": "Presentarse en la ventanilla de atención de Registro Académico."
+    },
+    {
+      "id": "p32_3",
+      "tramiteId": "edu32",
+      "orden": 3,
+      "descripcion": "Entregar el recibo y mostrar el carnet universitario."
+    },
+    {
+      "id": "p32_4",
+      "tramiteId": "edu32",
+      "orden": 4,
+      "descripcion": "Esperar la emisión de la constancia."
+    },
+    {
+      "id": "p33_1",
+      "tramiteId": "edu33",
+      "orden": 1,
+      "descripcion": "Solicitar el formato de retiro en la secretaría de la facultad o departamento."
+    },
+    {
+      "id": "p33_2",
+      "tramiteId": "edu33",
+      "orden": 2,
+      "descripcion": "Acudir con el docente de la asignatura para que firme el aval de retiro."
+    },
+    {
+      "id": "p33_3",
+      "tramiteId": "edu33",
+      "orden": 3,
+      "descripcion": "Entregar el formato firmado en la ventanilla de Registro Académico."
+    },
+    {
+      "id": "p33_4",
+      "tramiteId": "edu33",
+      "orden": 4,
+      "descripcion": "Verificar en el sistema en línea que la clase ya no aparezca activa."
+    },
+    {
+      "id": "p34_1",
+      "tramiteId": "edu34",
+      "orden": 1,
+      "descripcion": "Consolidar el documento del protocolo siguiendo las normativas de la facultad."
+    },
+    {
+      "id": "p34_2",
+      "tramiteId": "edu34",
+      "orden": 2,
+      "descripcion": "Imprimir y firmar la carta de solicitud."
+    },
+    {
+      "id": "p34_3",
+      "tramiteId": "edu34",
+      "orden": 3,
+      "descripcion": "Entregar los documentos en la secretaría del departamento de carrera."
+    },
+    {
+      "id": "p34_4",
+      "tramiteId": "edu34",
+      "orden": 4,
+      "descripcion": "Esperar la resolución y carta de aprobación por parte del comité o docente."
+    },
+    {
+      "id": "p35_1",
+      "tramiteId": "edu35",
+      "orden": 1,
+      "descripcion": "Acudir al área de circulación y préstamo de la biblioteca."
+    },
+    {
+      "id": "p35_2",
+      "tramiteId": "edu35",
+      "orden": 2,
+      "descripcion": "Entregar el carnet al bibliotecario para que verifique el estado en el sistema informático."
+    },
+    {
+      "id": "p35_3",
+      "tramiteId": "edu35",
+      "orden": 3,
+      "descripcion": "Si existe alguna multa por entrega tardía de libros, pagar en caja y volver con el recibo."
+    },
+    {
+      "id": "p35_4",
+      "tramiteId": "edu35",
+      "orden": 4,
+      "descripcion": "Recibir la hoja de solvencia debidamente sellada."
+    },
+    {
+      "id": "p36_1",
+      "tramiteId": "edu36",
+      "orden": 1,
+      "descripcion": "Acudir a la delegación municipal o departamental del MINED."
+    },
+    {
+      "id": "p36_2",
+      "tramiteId": "edu36",
+      "orden": 2,
+      "descripcion": "Entregar el título original y la fotocopia en ventanilla."
+    },
+    {
+      "id": "p36_3",
+      "tramiteId": "edu36",
+      "orden": 3,
+      "descripcion": "El funcionario revisará el libro de actas y cotejará la firma del director."
+    },
+    {
+      "id": "p36_4",
+      "tramiteId": "edu36",
+      "orden": 4,
+      "descripcion": "Recibir el título original con el sello y firma de registro en la parte posterior."
+    },
+    {
+      "id": "p37_1",
+      "tramiteId": "edu37",
+      "orden": 1,
+      "descripcion": "Verificar que el certificado emitido por el colegio no tenga borrones ni enmendaduras."
+    },
+    {
+      "id": "p37_2",
+      "tramiteId": "edu37",
+      "orden": 2,
+      "descripcion": "Dirigirse al área de Registro y Control de Documentos del MINED departamental."
+    },
+    {
+      "id": "p37_3",
+      "tramiteId": "edu37",
+      "orden": 3,
+      "descripcion": "Entregar el certificado de notas para su validación."
+    },
+    {
+      "id": "p37_4",
+      "tramiteId": "edu37",
+      "orden": 4,
+      "descripcion": "Retirar el documento con la certificación de auténtica del delegado del MINED."
+    },
+    {
+      "id": "p38_1",
+      "tramiteId": "edu38",
+      "orden": 1,
+      "descripcion": "Completar las firmas en la hoja de recorrido por todos los recintos de la universidad."
+    },
+    {
+      "id": "p38_2",
+      "tramiteId": "edu38",
+      "orden": 2,
+      "descripcion": "Realizar los pagos correspondientes al paquete de graduación."
+    },
+    {
+      "id": "p38_3",
+      "tramiteId": "edu38",
+      "orden": 3,
+      "descripcion": "Armar el expediente completo y entregarlo en Secretaría General."
+    },
+    {
+      "id": "p38_4",
+      "tramiteId": "edu38",
+      "orden": 4,
+      "descripcion": "Asistir al acto oficial de graduación para recibir el Título Universitario."
+    },
+    {
+      "id": "p39_1",
+      "tramiteId": "edu39",
+      "orden": 1,
+      "descripcion": "Depositar el costo de la reposición en la caja central."
+    },
+    {
+      "id": "p39_2",
+      "tramiteId": "edu39",
+      "orden": 2,
+      "descripcion": "Acudir a la oficina de carnetización o Bienestar Estudiantil."
+    },
+    {
+      "id": "p39_3",
+      "tramiteId": "edu39",
+      "orden": 3,
+      "descripcion": "Entregar el recibo y confirmar datos personales."
+    },
+    {
+      "id": "p39_4",
+      "tramiteId": "edu39",
+      "orden": 4,
+      "descripcion": "Tomarse una nueva fotografía y retirar el nuevo plástico."
+    },
+    {
+      "id": "p40_1",
+      "tramiteId": "edu40",
+      "orden": 1,
+      "descripcion": "Pagar el arancel en el área de caja."
+    },
+    {
+      "id": "p40_2",
+      "tramiteId": "edu40",
+      "orden": 2,
+      "descripcion": "Presentarse en Registro Académico y solicitar la constancia."
+    },
+    {
+      "id": "p40_3",
+      "tramiteId": "edu40",
+      "orden": 3,
+      "descripcion": "El sistema verificará que no haya asignaturas pendientes ni requisitos extracurriculares."
+    },
+    {
+      "id": "p40_4",
+      "tramiteId": "edu40",
+      "orden": 4,
+      "descripcion": "Retirar la constancia en el periodo indicado por el funcionario."
+    }
   ],
   "delegaciones": [
-    { "id": "d1", "tramiteId": "ced1", "nombreOficina": "CSE - Central Managua", "departamento": "Managua", "latitud": 12.136, "longitud": -86.250, "direccion": "Frente a Metrocentro" },
-    { "id": "d2", "tramiteId": "lic1", "nombreOficina": "Tránsito Nacional", "departamento": "Managua", "latitud": 12.125, "longitud": -86.240, "direccion": "Costado Norte Plaza El Sol" }
+    {
+      "id": "del_cse_leon",
+      "nombreOficina": "CSE - Delegación Municipal León",
+      "departamento": "León",
+      "latitud": 12.4379,
+      "longitud": -86.8794,
+      "direccion": "Costado norte de la Plaza Parque Juan José Quezada"
+    },
+    {
+      "id": "del_transito_leon",
+      "nombreOficina": "Tránsito Nacional - Delegación Departamental León",
+      "departamento": "León",
+      "latitud": 12.4332,
+      "longitud": -86.8845,
+      "direccion": "Complejo Policial Kurt Hans, León"
+    },
+    {
+      "id": "del_migracion_leon",
+      "nombreOficina": "SERTRAMI - Migración León",
+      "departamento": "León",
+      "latitud": 12.4315,
+      "longitud": -86.8812,
+      "direccion": "De la Iglesia Sutiaba 2 cuadras al oeste"
+    },
+    {
+      "id": "del_alcaldia_leon",
+      "nombreOficina": "Alcaldía Municipal de León (Registro Civil y Rentas)",
+      "departamento": "León",
+      "latitud": 12.4371,
+      "longitud": -86.8783,
+      "direccion": "Palacio Municipal, León"
+    },
+    {
+      "id": "del_dgi_leon",
+      "nombreOficina": "Administración de Rentas - DGI León",
+      "departamento": "León",
+      "latitud": 12.4350,
+      "longitud": -86.8750,
+      "direccion": "Frente al Mercadito de Sutiaba"
+    },
+    {
+      "id": "del_inss_leon",
+      "nombreOficina": "INSS - Sucursal León",
+      "departamento": "León",
+      "latitud": 12.4392,
+      "longitud": -86.8821,
+      "direccion": "Barrio San Juan, León"
+    },
+    {
+      "id": "del_unan_leon",
+      "nombreOficina": "UNAN-León Central (Registro Académico y Secretaría)",
+      "departamento": "León",
+      "latitud": 12.4338,
+      "longitud": -86.8798,
+      "direccion": "Vicerrectoría Académica, Edificio Central UNAN-León"
+    },
+    {
+      "id": "del_mined_leon",
+      "nombreOficina": "MINED - Delegación Departamental León",
+      "departamento": "León",
+      "latitud": 12.4410,
+      "longitud": -86.8850,
+      "direccion": "Costado este del Instituto Central Dr. Carlos Vega Morales"
+    }
+  ],
+  "delegacion_tramites": [
+    { "delegacionId": "del_cse_leon", "tramiteId": "ced1" },
+    { "delegacionId": "del_cse_leon", "tramiteId": "ced2" },
+    { "delegacionId": "del_cse_leon", "tramiteId": "ced3" },
+    { "delegacionId": "del_migracion_leon", "tramiteId": "pas4" },
+    { "delegacionId": "del_migracion_leon", "tramiteId": "pas5" },
+    { "delegacionId": "del_transito_leon", "tramiteId": "rec6" },
+    { "delegacionId": "del_migracion_leon", "tramiteId": "mov7" },
+    { "delegacionId": "del_alcaldia_leon", "tramiteId": "nac8" },
+    { "delegacionId": "del_alcaldia_leon", "tramiteId": "mat9" },
+    { "delegacionId": "del_alcaldia_leon", "tramiteId": "def10" },
+    { "delegacionId": "del_transito_leon", "tramiteId": "lic11" },
+    { "delegacionId": "del_transito_leon", "tramiteId": "lic12" },
+    { "delegacionId": "del_transito_leon", "tramiteId": "lic13" },
+    { "delegacionId": "del_transito_leon", "tramiteId": "mul14" },
+    { "delegacionId": "del_alcaldia_leon", "tramiteId": "sti15" },
+    { "delegacionId": "del_transito_leon", "tramiteId": "cir16" },
+    { "delegacionId": "del_transito_leon", "tramiteId": "tra17" },
+    { "delegacionId": "del_dgi_leon", "tramiteId": "neg21" },
+    { "delegacionId": "del_dgi_leon", "tramiteId": "neg22" },
+    { "delegacionId": "del_alcaldia_leon", "tramiteId": "neg23" },
+    { "delegacionId": "del_alcaldia_leon", "tramiteId": "neg24" },
+    { "delegacionId": "del_inss_leon", "tramiteId": "neg25" },
+    { "delegacionId": "del_alcaldia_leon", "tramiteId": "neg30" },
+    { "delegacionId": "del_unan_leon", "tramiteId": "edu31" },
+    { "delegacionId": "del_unan_leon", "tramiteId": "edu32" },
+    { "delegacionId": "del_unan_leon", "tramiteId": "edu33" },
+    { "delegacionId": "del_unan_leon", "tramiteId": "edu34" },
+    { "delegacionId": "del_unan_leon", "tramiteId": "edu35" },
+    { "delegacionId": "del_mined_leon", "tramiteId": "edu36" },
+    { "delegacionId": "del_mined_leon", "tramiteId": "edu37" },
+    { "delegacionId": "del_unan_leon", "tramiteId": "edu38" },
+    { "delegacionId": "del_unan_leon", "tramiteId": "edu39" },
+    { "delegacionId": "del_unan_leon", "tramiteId": "edu40" }
   ]
 }

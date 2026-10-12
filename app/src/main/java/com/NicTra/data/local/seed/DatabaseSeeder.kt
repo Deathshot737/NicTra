@@ -70,7 +70,7 @@ object DatabaseSeeder {
                 }
             }
 
-            // Pasos (¡Añadido de nuevo!)
+            // Pasos
             val pasosJson = jsonObject.optJSONArray("pasos")
             val pasosList = mutableListOf<PasoEntity>()
             pasosJson?.let {
@@ -85,7 +85,7 @@ object DatabaseSeeder {
                 }
             }
 
-            // Delegaciones (¡Añadido de nuevo!)
+            // Delegaciones
             val delegacionesJson = jsonObject.optJSONArray("delegaciones")
             val delegacionesList = mutableListOf<DelegacionEntity>()
             delegacionesJson?.let {
@@ -93,7 +93,6 @@ object DatabaseSeeder {
                     val obj = it.getJSONObject(i)
                     delegacionesList.add(DelegacionEntity(
                         id = obj.getString("id"),
-                        tramiteId = obj.getString("tramiteId"),
                         nombreOficina = obj.getString("nombreOficina"),
                         departamento = obj.getString("departamento"),
                         latitud = obj.optDouble("latitud", 0.0),
@@ -103,11 +102,25 @@ object DatabaseSeeder {
                 }
             }
 
+            // Relación Delegación-Trámite (N:N)
+            val delTramitesJson = jsonObject.optJSONArray("delegacion_tramites")
+            val delTramitesList = mutableListOf<DelegacionTramiteCrossRef>()
+            delTramitesJson?.let {
+                for (i in 0 until it.length()) {
+                    val obj = it.getJSONObject(i)
+                    delTramitesList.add(DelegacionTramiteCrossRef(
+                        delegacionId = obj.getString("delegacionId"),
+                        tramiteId = obj.getString("tramiteId")
+                    ))
+                }
+            }
+
             if (categoriasList.isNotEmpty()) tramiteDao.insertCategorias(categoriasList)
             if (tramitesList.isNotEmpty()) tramiteDao.insertTramites(tramitesList)
             if (requisitosList.isNotEmpty()) tramiteDao.insertRequisitos(requisitosList)
             if (pasosList.isNotEmpty()) tramiteDao.insertPasos(pasosList)
             if (delegacionesList.isNotEmpty()) tramiteDao.insertDelegaciones(delegacionesList)
+            if (delTramitesList.isNotEmpty()) tramiteDao.insertDelegacionTramiteCrossRefs(delTramitesList)
             
             Log.i("NicTraDB", "SIEMBRA COMPLETADA EXITOSAMENTE.")
         } catch (e: Exception) {

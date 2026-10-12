@@ -22,6 +22,9 @@ interface TramiteDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDelegaciones(delegaciones: List<DelegacionEntity>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertDelegacionTramiteCrossRefs(crossRefs: List<DelegacionTramiteCrossRef>)
+
     @Query("SELECT * FROM categorias")
     fun getAllCategorias(): Flow<List<CategoriaEntity>>
 
@@ -31,7 +34,12 @@ interface TramiteDao {
     @Query("SELECT * FROM tramites WHERE categoriaId = :categoriaId")
     fun getTramitesByCategoria(categoriaId: String): Flow<List<TramiteEntity>>
 
-    @Query("SELECT * FROM tramites WHERE titulo LIKE '%' || :query || '%'")
+    @Query("""
+        SELECT * FROM tramites 
+        WHERE titulo LIKE '%' || :query || '%' 
+        OR entidad LIKE '%' || :query || '%' 
+        OR descripcion LIKE '%' || :query || '%'
+    """)
     fun searchTramites(query: String): Flow<List<TramiteEntity>>
 
     @Query("SELECT * FROM tramites WHERE id = :tramiteId")
@@ -43,7 +51,12 @@ interface TramiteDao {
     @Query("SELECT * FROM pasos WHERE tramiteId = :tramiteId ORDER BY orden ASC")
     fun getPasosByTramite(tramiteId: String): Flow<List<PasoEntity>>
 
-    @Query("SELECT * FROM delegaciones WHERE tramiteId = :tramiteId")
+    @Transaction
+    @Query("""
+        SELECT d.* FROM delegaciones d
+        INNER JOIN delegacion_tramites dt ON d.id = dt.delegacionId
+        WHERE dt.tramiteId = :tramiteId
+    """)
     fun getDelegacionesByTramite(tramiteId: String): Flow<List<DelegacionEntity>>
 
     @Query("SELECT * FROM tramites WHERE isQuickAccess = 1")

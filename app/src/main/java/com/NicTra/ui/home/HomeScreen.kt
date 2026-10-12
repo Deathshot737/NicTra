@@ -28,10 +28,12 @@ fun HomeScreen(
     categorias: List<CategoriaEntity>,
     quickAccess: List<TramiteEntity>,
     recentTramites: List<TramiteEntity>,
+    searchResults: List<TramiteEntity>,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
     completedCount: Int,
     onCategoryClick: (CategoriaEntity) -> Unit,
-    onTramiteClick: (String) -> Unit,
-    onSearchClick: () -> Unit
+    onTramiteClick: (String) -> Unit
 ) {
     Scaffold(
         bottomBar = {
@@ -75,31 +77,51 @@ fun HomeScreen(
                 .background(Color(0xFFF5F7FA))
         ) {
             item {
-                HeaderSection(onSearchClick)
+                HeaderSection(searchQuery, onSearchQueryChange)
             }
-            item {
-                SectionTitle("¿Qué necesitas hacer hoy?")
-                CategoriesGrid(categorias, onCategoryClick)
-            }
-            item {
-                SectionTitle("Accesos rápidos")
-                QuickAccessList(quickAccess, onTramiteClick)
-            }
-            item {
-                SectionTitle("Trámites recientes")
-            }
-            if (recentTramites.isEmpty()) {
+
+            if (searchQuery.isNotEmpty()) {
                 item {
-                    Text(
-                        "No hay trámites recientes",
-                        modifier = Modifier.padding(16.dp),
-                        color = Color.Gray,
-                        fontSize = 14.sp
-                    )
+                    SectionTitle("Resultados para \"$searchQuery\"")
+                }
+                if (searchResults.isEmpty()) {
+                    item {
+                        Text(
+                            "No se encontraron trámites con ese nombre.",
+                            modifier = Modifier.padding(16.dp),
+                            color = Color.Gray
+                        )
+                    }
+                } else {
+                    items(searchResults) { tramite ->
+                        RecentTramiteCard(tramite, onTramiteClick)
+                    }
                 }
             } else {
-                items(recentTramites) { tramite ->
-                    RecentTramiteCard(tramite, onTramiteClick)
+                item {
+                    SectionTitle("¿Qué necesitas hacer hoy?")
+                    CategoriesGrid(categorias, onCategoryClick)
+                }
+                item {
+                    SectionTitle("Accesos rápidos")
+                    QuickAccessList(quickAccess, onTramiteClick)
+                }
+                item {
+                    SectionTitle("Trámites recientes")
+                }
+                if (recentTramites.isEmpty()) {
+                    item {
+                        Text(
+                            "No hay trámites recientes",
+                            modifier = Modifier.padding(16.dp),
+                            color = Color.Gray,
+                            fontSize = 14.sp
+                        )
+                    }
+                } else {
+                    items(recentTramites) { tramite ->
+                        RecentTramiteCard(tramite, onTramiteClick)
+                    }
                 }
             }
             item {
@@ -110,7 +132,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun HeaderSection(onSearchClick: () -> Unit) {
+fun HeaderSection(searchQuery: String, onSearchQueryChange: (String) -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -150,26 +172,30 @@ fun HeaderSection(onSearchClick: () -> Unit) {
             }
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onSearchClick() },
+                value = searchQuery,
+                onValueChange = onSearchQueryChange,
+                modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Buscar trámite: Licencia, Pasaporte...", color = Color.Gray) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
                 trailingIcon = { 
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = Color.White,
-                        modifier = Modifier.padding(end = 8.dp).size(36.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                Icons.Default.LocationOn, 
-                                contentDescription = null, 
-                                tint = Color(0xFF1A3B70),
-                                modifier = Modifier.size(20.dp)
-                            )
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { onSearchQueryChange("") }) {
+                            Icon(Icons.Default.Clear, contentDescription = "Borrar", tint = Color.Gray)
+                        }
+                    } else {
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color.White,
+                            modifier = Modifier.padding(end = 8.dp).size(36.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    Icons.Default.LocationOn, 
+                                    contentDescription = null, 
+                                    tint = Color(0xFF1A3B70),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
                     }
                 },
@@ -180,8 +206,7 @@ fun HeaderSection(onSearchClick: () -> Unit) {
                     disabledContainerColor = Color.White,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                ),
-                enabled = false
+                )
             )
         }
     }

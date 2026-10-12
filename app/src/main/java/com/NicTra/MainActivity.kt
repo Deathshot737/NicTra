@@ -2,6 +2,7 @@ package com.nictra
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +31,10 @@ class MainActivity : ComponentActivity() {
             var showWelcome by remember { mutableStateOf(true) }
             var selectedCategory by remember { mutableStateOf<CategoriaEntity?>(null) }
             var selectedTramiteId by remember { mutableStateOf<String?>(null) }
+            
+            // Estado para la búsqueda
+            var searchQuery by remember { mutableStateOf("") }
+            val searchResults by repository.searchTramites(searchQuery).collectAsState(initial = emptyList())
 
             MaterialTheme {
                 Surface(
@@ -41,6 +46,10 @@ class MainActivity : ComponentActivity() {
                             WelcomeScreen(onNavigateToHome = { showWelcome = false })
                         }
                         selectedTramiteId != null -> {
+                            BackHandler {
+                                selectedTramiteId = null
+                            }
+
                             val id = selectedTramiteId!!
                             val tramite by produceState<TramiteEntity?>(initialValue = null, id) {
                                 value = repository.getTramiteById(id)
@@ -68,6 +77,10 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         selectedCategory != null -> {
+                            BackHandler {
+                                selectedCategory = null
+                            }
+
                             val category = selectedCategory!!
                             val tramites by repository.getTramitesByCategoria(category.id).collectAsState(initial = emptyList())
                             
@@ -84,6 +97,13 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         else -> {
+                            // En el inicio, si hay texto de búsqueda, el botón atrás la limpia
+                            if (searchQuery.isNotEmpty()) {
+                                BackHandler {
+                                    searchQuery = ""
+                                }
+                            }
+
                             val categorias by repository.getAllCategorias().collectAsState(initial = emptyList())
                             val quickAccess by repository.getQuickAccessTramites().collectAsState(initial = emptyList())
                             val recentTramites by repository.getRecentTramites().collectAsState(initial = emptyList())
@@ -93,6 +113,9 @@ class MainActivity : ComponentActivity() {
                                 categorias = categorias,
                                 quickAccess = quickAccess,
                                 recentTramites = recentTramites,
+                                searchResults = searchResults,
+                                searchQuery = searchQuery,
+                                onSearchQueryChange = { searchQuery = it },
                                 completedCount = completedCount,
                                 onCategoryClick = { category ->
                                     selectedCategory = category
@@ -102,9 +125,6 @@ class MainActivity : ComponentActivity() {
                                         repository.markTramiteAsVisited(tramiteId)
                                     }
                                     selectedTramiteId = tramiteId
-                                },
-                                onSearchClick = {
-                                    // Lógica de búsqueda
                                 }
                             )
                         }
