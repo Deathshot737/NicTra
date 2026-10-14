@@ -80,7 +80,7 @@ fun WelcomeScreen(onNavigateToHome: () -> Unit) {
 
             // Título
             Text(
-                text = "¡Bienvenida\ny bienvenido!",
+                text = "¡Bienvenid@!",
                 color = Color.White,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.ExtraBold,
@@ -151,11 +151,11 @@ fun WelcomeScreen(onNavigateToHome: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "Sin cuenta ni contraseña requerida",
-                color = Color.White.copy(alpha = 0.6f),
-                fontSize = 12.sp
-            )
+//            Text(
+//                text = "Sin cuenta ni contraseña requerida",
+//                color = Color.White.copy(alpha = 0.6f),
+//                fontSize = 12.sp
+//            )
         }
     }
 }

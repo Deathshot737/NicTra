@@ -1,5 +1,6 @@
 package com.nictra.ui.map
 
+import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,14 +16,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.*
+import androidx.compose.ui.viewinterop.AndroidView
 import com.nictra.data.local.entities.DelegacionEntity
+import org.osmdroid.config.Configuration
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.CustomZoomButtonsController
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +37,8 @@ fun MapScreen(
     onMyTramitesClick: () -> Unit,
     completedCount: Int
 ) {
-    var selectedTab by remember { mutableStateOf(0) }
+    val context = LocalContext.current
+    var selectedTab by remember { mutableIntStateOf(0) }
     
     // Estado de la delegación seleccionada
     var selectedDelegation by remember(delegaciones, initialSelectedDelegationId) { 
@@ -43,19 +48,25 @@ fun MapScreen(
         ) 
     }
 
-    // Centrar en León, Nicaragua por defecto
-    val leonCenter = LatLng(12.4350, -86.8790)
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(leonCenter, 15f)
+    // Configurar Osmdroid (User Agent es obligatorio)
+    LaunchedEffect(Unit) {
+        Configuration.getInstance().load(context, context.getSharedPreferences("osmdroid", Context.MODE_PRIVATE))
+        Configuration.getInstance().userAgentValue = context.packageName
     }
 
-    // Efecto para "volar" a la delegación seleccionada
+    val mapView = remember {
+        MapView(context).apply {
+            setMultiTouchControls(true)
+            zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
+            controller.setZoom(15.0)
+        }
+    }
+
+    // Efecto para centrar el mapa cuando cambia la delegación
     LaunchedEffect(selectedDelegation) {
         selectedDelegation?.let {
-            cameraPositionState.animate(
-                update = CameraUpdateFactory.newLatLngZoom(LatLng(it.latitud, it.longitud), 17f),
-                durationMs = 1000
-            )
+            val point = GeoPoint(it.latitud, it.longitud)
+            mapView.controller.animateTo(point, 17.0, 1000L)
         }
     }
 
@@ -135,25 +146,29 @@ fun MapScreen(
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             if (selectedTab == 0) {
-                // GOOGLE MAPS REAL 🌍
-                GoogleMap(
+                // OPEN STREET MAP REAL (Gratis) 🌍
+                AndroidView(
+                    factory = { mapView },
                     modifier = Modifier.fillMaxSize(),
-                    cameraPositionState = cameraPositionState,
-                    uiSettings = MapUiSettings(zoomControlsEnabled = false, myLocationButtonEnabled = true)
-                ) {
-                    delegaciones.forEach { delegation ->
-                        Marker(
-                            state = MarkerState(position = LatLng(delegation.latitud, delegation.longitud)),
-                            title = delegation.nombreOficina,
-                            onClick = {
+                    update = { mv ->
+                        mv.overlays.clear()
+                        delegaciones.forEach { delegation ->
+                            val marker = Marker(mv)
+                            marker.position = GeoPoint(delegation.latitud, delegation.longitud)
+                            marker.title = delegation.nombreOficina
+                            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                            marker.setOnMarkerClickListener { m, _ ->
                                 selectedDelegation = delegation
-                                false 
+                                m.showInfoWindow()
+                                true
                             }
-                        )
+                            mv.overlays.add(marker)
+                        }
+                        mv.invalidate()
                     }
-                }
+                )
 
-                // Tarjeta inferior (Exacta al Figma)
+                // Tarjeta inferior
                 selectedDelegation?.let { delegation ->
                     Card(
                         modifier = Modifier
@@ -181,7 +196,7 @@ fun MapScreen(
                                 }
                             }
                             
-                            Divider(modifier = Modifier.padding(vertical = 12.dp), color = Color.LightGray.copy(alpha = 0.5f))
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.LightGray.copy(alpha = 0.5f))
                             
                             Row(verticalAlignment = Alignment.Top) {
                                 Icon(Icons.Default.LocationOn, null, Modifier.size(16.dp), Color(0xFFD32F2F))
@@ -208,9 +223,9 @@ fun MapScreen(
                 ) {
                     items(delegaciones) { delegation ->
                         Card(
-                            modifier = Modifier.fillMaxWidth().clickable { 
+                            modifier = Modifier.fillMaxWidth().clickable {
                                 selectedDelegation = delegation
-                                selectedTab = 0 
+                                selectedTab = 0
                             },
                             shape = RoundedCornerShape(12.dp),
                             colors = CardDefaults.cardColors(containerColor = if (selectedDelegation?.id == delegation.id) Color(0xFFE3F2FD) else Color.White),

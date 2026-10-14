@@ -164,7 +164,7 @@ fun HeaderSection(searchQuery: String, onSearchQueryChange: (String) -> Unit) {
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "¡Bienvenida y bienvenido!",
+                    text = "¡Bienvenid@!",
                     color = Color.White,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
