@@ -1,5 +1,6 @@
 package com.nictra
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -21,10 +22,15 @@ import com.nictra.ui.tramites.TramiteDetailScreen
 import com.nictra.ui.tramites.TramitesListScreen
 import com.nictra.ui.welcome.WelcomeScreen
 import kotlinx.coroutines.launch
+import org.osmdroid.config.Configuration
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Inicialización obligatoria de OpenStreetMap
+        Configuration.getInstance().load(this, getSharedPreferences("osmdroid", Context.MODE_PRIVATE))
+        Configuration.getInstance().userAgentValue = packageName
 
         val db = AppDatabase.getDatabase(applicationContext, lifecycleScope)
         val repository = TramiteRepository(db.tramiteDao())
@@ -50,9 +56,7 @@ class MainActivity : ComponentActivity() {
                             WelcomeScreen(onNavigateToHome = { showWelcome = false })
                         }
                         selectedTramiteId != null -> {
-                            BackHandler {
-                                selectedTramiteId = null
-                            }
+                            BackHandler { selectedTramiteId = null }
 
                             val id = selectedTramiteId!!
                             val tramite by produceState<TramiteEntity?>(initialValue = null, id) {
@@ -83,23 +87,17 @@ class MainActivity : ComponentActivity() {
                                         }
                                     },
                                     onResetClick = {
-                                        lifecycleScope.launch {
-                                            repository.resetTramite(id)
-                                        }
+                                        lifecycleScope.launch { repository.resetTramite(id) }
                                     },
                                     onStartTracking = {
-                                        lifecycleScope.launch {
-                                            repository.markTramiteAsVisited(id)
-                                        }
+                                        lifecycleScope.launch { repository.markTramiteAsVisited(id) }
                                     },
                                     onDelegationClick = { delId ->
                                         selectedDelegationId = delId
                                         showMap = true
                                         selectedTramiteId = null
                                     },
-                                    onSaveClick = { 
-                                        selectedTramiteId = null 
-                                    }
+                                    onSaveClick = { selectedTramiteId = null }
                                 )
                             }
                         }
@@ -120,25 +118,19 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onMyTramitesClick = {
                                     showMap = false
-                                    selectedDelegationId = null
                                     showMyTramites = true
                                 },
                                 completedCount = completedCount
                             )
                         }
                         showMyTramites -> {
-                            BackHandler {
-                                showMyTramites = false
-                            }
-                            
+                            BackHandler { showMyTramites = false }
                             val myTramitesProgress by repository.getMyTramitesWithProgress().collectAsState(initial = emptyList())
                             val completedCount by repository.getCompletedTramitesCount().collectAsState(initial = 0)
                             
                             MyTramitesScreen(
                                 tramitesProgress = myTramitesProgress,
-                                onTramiteClick = { tramiteId ->
-                                    selectedTramiteId = tramiteId
-                                },
+                                onTramiteClick = { selectedTramiteId = it },
                                 onHomeClick = { showMyTramites = false },
                                 onMapClick = { 
                                     showMyTramites = false
@@ -148,10 +140,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         selectedCategory != null -> {
-                            BackHandler {
-                                selectedCategory = null
-                            }
-
+                            BackHandler { selectedCategory = null }
                             val category = selectedCategory!!
                             val tramites by repository.getTramitesByCategoria(category.id).collectAsState(initial = emptyList())
                             
@@ -159,18 +148,10 @@ class MainActivity : ComponentActivity() {
                                 categoriaNombre = category.nombre,
                                 tramites = tramites,
                                 onBackClick = { selectedCategory = null },
-                                onTramiteClick = { tramiteId ->
-                                    selectedTramiteId = tramiteId
-                                }
+                                onTramiteClick = { selectedTramiteId = it }
                             )
                         }
                         else -> {
-                            if (searchQuery.isNotEmpty()) {
-                                BackHandler {
-                                    searchQuery = ""
-                                }
-                            }
-
                             val categorias by repository.getAllCategorias().collectAsState(initial = emptyList())
                             val quickAccess by repository.getQuickAccessTramites().collectAsState(initial = emptyList())
                             val recentTramites by repository.getRecentTramites().collectAsState(initial = emptyList())
@@ -184,18 +165,10 @@ class MainActivity : ComponentActivity() {
                                 searchQuery = searchQuery,
                                 onSearchQueryChange = { searchQuery = it },
                                 completedCount = completedCount,
-                                onCategoryClick = { category ->
-                                    selectedCategory = category
-                                },
-                                onTramiteClick = { tramiteId ->
-                                    selectedTramiteId = tramiteId
-                                },
-                                onMyTramitesClick = {
-                                    showMyTramites = true
-                                },
-                                onMapClick = {
-                                    showMap = true
-                                }
+                                onCategoryClick = { selectedCategory = it },
+                                onTramiteClick = { selectedTramiteId = it },
+                                onMyTramitesClick = { showMyTramites = true },
+                                onMapClick = { showMap = true }
                             )
                         }
                     }

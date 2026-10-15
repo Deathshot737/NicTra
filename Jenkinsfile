@@ -56,9 +56,9 @@ pipeline {
         stage('Archive Artifacts') {
             steps {
                 echo 'Guardando NicTra.apk en Jenkins...'
-                archiveArtifacts artifacts: 'app/build/outputs/apk/debug/NicTra.apk', 
-                                 fingerprint: true, 
-                                 allowEmptyArchive: false
+                archiveArtifacts artifacts: 'app/build/outputs/apk/debug/NicTra.apk',
+                        fingerprint: true,
+                        allowEmptyArchive: false
             }
         }
 
@@ -186,4 +186,3 @@ pipeline {
         }
     }
 }
-
