@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.nictra"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -31,11 +31,12 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -46,6 +47,14 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            // Necesario para evitar conflictos con GraphHopper y procesar rutas offline
+            pickFirsts += "META-INF/INDEX.LIST"
+            pickFirsts += "META-INF/DEPENDENCIES"
+            pickFirsts += "META-INF/LICENSE"
+            pickFirsts += "META-INF/LICENSE.md"
+            pickFirsts += "META-INF/NOTICE"
+            pickFirsts += "META-INF/NOTICE.md"
+            excludes += "META-INF/*.kotlin_module"
         }
     }
 }
@@ -64,13 +73,20 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     
-    // Maps (OpenStreetMap)
+    // Maps (OpenStreetMap 100% Offline)
     implementation(libs.osmdroid.android)
+    
+    // Motor de Rutas Offline (GraphHopper)
+    implementation(libs.graphhopper.core)
+    implementation(libs.slf4j.android)
     
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
+    // Desugaring
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -1,5 +1,6 @@
 package com.nictra
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,8 +9,13 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.nictra.data.local.AppDatabase
 import com.nictra.data.local.entities.CategoriaEntity
@@ -24,11 +30,48 @@ import com.nictra.ui.welcome.WelcomeScreen
 import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 
+// Colores de marca NicTra
+private val NictraBlue = Color(0xFF1A3B70)
+private val NictraGreen = Color(0xFF4CAF50)
+private val NictraBackground = Color(0xFFF5F7FA)
+
+private val NicTraColorScheme = lightColorScheme(
+    primary = NictraBlue,
+    onPrimary = Color.White,
+    primaryContainer = NictraBlue.copy(alpha = 0.1f),
+    onPrimaryContainer = NictraBlue,
+    secondary = NictraGreen,
+    onSecondary = Color.White,
+    secondaryContainer = NictraBlue.copy(alpha = 0.12f), // Color de la píldora de selección (NO MORADO)
+    onSecondaryContainer = NictraBlue,
+    tertiary = Color(0xFFFBC02D),
+    surface = Color.White,
+    onSurface = Color(0xFF1C1B1F),
+    background = NictraBackground,
+    surfaceVariant = Color.White,
+    surfaceTint = Color.Transparent // Desactiva el tinte morado por elevación
+)
+
+@Composable
+fun NicTraTheme(content: @Composable () -> Unit) {
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = NictraBlue.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+        }
+    }
+    MaterialTheme(
+        colorScheme = NicTraColorScheme,
+        content = content
+    )
+}
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Inicialización obligatoria de OpenStreetMap
         Configuration.getInstance().load(this, getSharedPreferences("osmdroid", Context.MODE_PRIVATE))
         Configuration.getInstance().userAgentValue = packageName
 
@@ -46,18 +89,15 @@ class MainActivity : ComponentActivity() {
             var searchQuery by remember { mutableStateOf("") }
             val searchResults by repository.searchTramites(searchQuery).collectAsState(initial = emptyList())
 
-            MaterialTheme {
+            NicTraTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     when {
-                        showWelcome -> {
-                            WelcomeScreen(onNavigateToHome = { showWelcome = false })
-                        }
+                        showWelcome -> WelcomeScreen(onNavigateToHome = { showWelcome = false })
                         selectedTramiteId != null -> {
                             BackHandler { selectedTramiteId = null }
-
                             val id = selectedTramiteId!!
                             val tramite by produceState<TramiteEntity?>(initialValue = null, id) {
                                 value = repository.getTramiteById(id)
@@ -76,22 +116,14 @@ class MainActivity : ComponentActivity() {
                                     onRequisitoCheckChange = { reqId, checked ->
                                         lifecycleScope.launch {
                                             repository.updateRequisitoStatus(reqId, checked)
-                                            if (checked && tramite?.lastVisited == null) {
-                                                repository.markTramiteAsVisited(id)
-                                            }
+                                            if (checked && tramite?.lastVisited == null) repository.markTramiteAsVisited(id)
                                         }
                                     },
                                     onCompleteClick = { completed ->
-                                        lifecycleScope.launch {
-                                            repository.updateCompletionStatus(id, completed)
-                                        }
+                                        lifecycleScope.launch { repository.updateCompletionStatus(id, completed) }
                                     },
-                                    onResetClick = {
-                                        lifecycleScope.launch { repository.resetTramite(id) }
-                                    },
-                                    onStartTracking = {
-                                        lifecycleScope.launch { repository.markTramiteAsVisited(id) }
-                                    },
+                                    onResetClick = { lifecycleScope.launch { repository.resetTramite(id) } },
+                                    onStartTracking = { lifecycleScope.launch { repository.markTramiteAsVisited(id) } },
                                     onDelegationClick = { delId ->
                                         selectedDelegationId = delId
                                         showMap = true
@@ -108,7 +140,6 @@ class MainActivity : ComponentActivity() {
                             }
                             val allDelegaciones by repository.getAllDelegaciones().collectAsState(initial = emptyList())
                             val completedCount by repository.getCompletedTramitesCount().collectAsState(initial = 0)
-
                             MapScreen(
                                 delegaciones = allDelegaciones,
                                 initialSelectedDelegationId = selectedDelegationId,
@@ -127,7 +158,6 @@ class MainActivity : ComponentActivity() {
                             BackHandler { showMyTramites = false }
                             val myTramitesProgress by repository.getMyTramitesWithProgress().collectAsState(initial = emptyList())
                             val completedCount by repository.getCompletedTramitesCount().collectAsState(initial = 0)
-                            
                             MyTramitesScreen(
                                 tramitesProgress = myTramitesProgress,
                                 onTramiteClick = { selectedTramiteId = it },
@@ -143,7 +173,6 @@ class MainActivity : ComponentActivity() {
                             BackHandler { selectedCategory = null }
                             val category = selectedCategory!!
                             val tramites by repository.getTramitesByCategoria(category.id).collectAsState(initial = emptyList())
-                            
                             TramitesListScreen(
                                 categoriaNombre = category.nombre,
                                 tramites = tramites,
@@ -156,7 +185,6 @@ class MainActivity : ComponentActivity() {
                             val quickAccess by repository.getQuickAccessTramites().collectAsState(initial = emptyList())
                             val recentTramites by repository.getRecentTramites().collectAsState(initial = emptyList())
                             val completedCount by repository.getCompletedTramitesCount().collectAsState(initial = 0)
-
                             HomeScreen(
                                 categorias = categorias,
                                 quickAccess = quickAccess,
