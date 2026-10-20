@@ -86,6 +86,7 @@ fun MapScreen(
     var isHopperReady by remember { mutableStateOf(false) }
     var isMapOffline by remember { mutableStateOf(false) }
     var routeInfo by remember { mutableStateOf<String?>(null) }
+    var routePoints by remember { mutableStateOf<List<GeoPoint>?>(null) }
     var selectedProfile by rememberSaveable { mutableStateOf("car") }
 
     val profileIcons = remember {
@@ -111,6 +112,8 @@ fun MapScreen(
         Configuration.getInstance().userAgentValue = context.packageName
         Configuration.getInstance().osmdroidBasePath = baseDir
         Configuration.getInstance().osmdroidTileCache = File(baseDir, "osmdroid")
+        
+        // Cargar configuración de osmdroid
         Configuration.getInstance().load(context, context.getSharedPreferences("osmdroid", Context.MODE_PRIVATE))
 
         MapView(context).apply {
@@ -118,12 +121,15 @@ fun MapScreen(
             zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
             controller.setZoom(15.0)
             controller.setCenter(leonCenter)
+            setUseDataConnection(false) // Deshabilitar conexión de datos para asegurar modo offline
         }
     }
 
     LaunchedEffect(selectedDelegation) {
         selectedDelegation?.let {
             mapView.controller.animateTo(GeoPoint(it.latitud, it.longitud))
+            routePoints = null
+            routeInfo = null
         }
     }
 
@@ -139,15 +145,19 @@ fun MapScreen(
                     try {
                         val offlineProvider = OfflineTileProvider(SimpleRegisterReceiver(context), arrayOf(mapFile))
                         mapView.tileProvider = offlineProvider
+                        
+                        // Fuente de teselas para el archivo MBTiles (Mapnik es común en mbtiles)
                         val source = XYTileSource("Mapnik", 0, 22, 256, ".png", arrayOf())
                         mapView.setTileSource(source)
-                        mapView.setUseDataConnection(false)
                         isMapOffline = true
+                        Log.d("NicTra", "Mapa offline leon.mbtiles cargado correctamente")
                     } catch (e: Exception) {
-                        mapView.setTileSource(TileSourceFactory.MAPNIK)
+                        Log.e("NicTra", "Error cargando mapa offline", e)
+                        Toast.makeText(context, "Error cargando mapa offline", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    mapView.setTileSource(TileSourceFactory.MAPNIK)
+                    Log.e("NicTra", "Archivo leon.mbtiles no encontrado en: ${mapFile.absolutePath}")
+                    Toast.makeText(context, "Mapa offline no disponible", Toast.LENGTH_LONG).show()
                 }
                 mapView.invalidate()
             }
@@ -160,9 +170,10 @@ fun MapScreen(
                     config.putObject("graph.location", ghDataFolder.absolutePath)
                     
                     val profiles = ArrayList<Profile>()
-                    profiles.add(Profile("car").setVehicle("car").setWeighting("fastest"))
-                    profiles.add(Profile("foot").setVehicle("foot").setWeighting("fastest"))
-                    profiles.add(Profile("bike").setVehicle("bike").setWeighting("fastest"))
+                    // Ajustado para GraphHopper 11.1 (vehicle se infiere o se omite si ya está en el grafo)
+                    profiles.add(Profile("car").setWeighting("fastest"))
+                    profiles.add(Profile("foot").setWeighting("fastest"))
+                    profiles.add(Profile("bike").setWeighting("fastest"))
                     config.setProfiles(profiles)
 
                     hopper.init(config)
@@ -267,191 +278,206 @@ fun MapScreen(
                 modifier = Modifier.fillMaxSize().zIndex(0f),
                 update = { mv ->
                     mv.overlays.clear()
+                    
+                    // Dibujar la ruta si existe
+                    routePoints?.let { points ->
+                        val line = Polyline(mv)
+                        line.setPoints(points)
+                        line.outlinePaint.color = android.graphics.Color.BLUE
+                        line.outlinePaint.strokeWidth = 10f
+                        mv.overlays.add(line)
+                    }
+
                     mv.overlays.add(locationOverlay)
+                    
+                    // Marcadores de delegaciones
                     delegaciones.forEach { delegacion ->
-                        val marker = Marker(mv)
-                        marker.position = GeoPoint(delegacion.latitud, delegacion.longitud)
-                        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                        marker.title = delegacion.nombreOficina
-                        marker.snippet = delegacion.direccion
-                        marker.icon = ContextCompat.getDrawable(context, org.osmdroid.library.R.drawable.marker_default)
-                        if (selectedDelegation?.id == delegacion.id) marker.showInfoWindow()
+                        val marker = Marker(mv).apply {
+                            position = GeoPoint(delegacion.latitud, delegacion.longitud)
+                            title = delegacion.nombreOficina
+                            snippet = delegacion.direccion
+                            icon = ContextCompat.getDrawable(context, org.osmdroid.library.R.drawable.marker_default)
+                            setOnMarkerClickListener { m, _ ->
+                                selectedDelegation = delegacion
+                                m.showInfoWindow()
+                                true
+                            }
+                        }
                         mv.overlays.add(marker)
                     }
                 }
             )
 
-            if (isPreparingData) {
-                Box(modifier = Modifier.fillMaxSize().zIndex(10f).background(NictraBackground), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator(color = NictraBlue)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text("Cargando mapas y rutas...", style = MaterialTheme.typography.bodyMedium, color = NictraBlue)
+            // CAPA 1: Botón Volver a Mi Ubicación
+            FloatingActionButton(
+                onClick = {
+                    if (hasLocationPermission) {
+                        val myLoc = locationOverlay.myLocation
+                        if (myLoc != null) {
+                            mapView.controller.animateTo(myLoc)
+                        } else {
+                            Toast.makeText(context, "Buscando GPS...", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        launcher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
                     }
-                }
-            } else {
-                // CAPA 1: ELEMENTOS DE INTERFAZ (Siempre visibles encima del mapa)
-                Box(modifier = Modifier.fillMaxSize().zIndex(1f)) {
-                    
-                    // Selector de Delegación (Superior)
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp)
-                            .align(Alignment.TopCenter),
-                        shape = RoundedCornerShape(12.dp),
-                        shadowElevation = 8.dp,
-                        color = Color.White,
-                        tonalElevation = 0.dp // Fuerza blanco puro, elimina morado
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 16.dp, bottom = 240.dp) // Arriba del panel de info
+                    .size(48.dp),
+                containerColor = Color.White,
+                contentColor = NictraBlue,
+                shape = RoundedCornerShape(12.dp),
+                elevation = FloatingActionButtonDefaults.elevation(4.dp)
+            ) {
+                Icon(Icons.Default.MyLocation, contentDescription = "Mi Ubicación")
+            }
+
+            // CAPA 2: Panel de Información de Delegación Seleccionada
+            selectedDelegation?.let { delegation ->
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .zIndex(1f)
+                ) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.White
+                        )
                     ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Text(
-                                "Seleccionar Delegación",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = Color.Gray
-                            )
-                            ScrollableTabRow(
-                                selectedTabIndex = delegaciones.indexOf(selectedDelegation).coerceAtLeast(0),
-                                edgePadding = 0.dp,
-                                containerColor = Color.Transparent,
-                                contentColor = NictraBlue,
-                                divider = {},
-                                indicator = { tabPositions ->
-                                    val index = delegaciones.indexOf(selectedDelegation)
-                                    if (index >= 0) {
-                                        TabRowDefaults.SecondaryIndicator(
-                                            Modifier.tabIndicatorOffset(tabPositions[index]),
-                                            color = NictraBlue
-                                        )
-                                    }
-                                }
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            // Encabezado con perfil de transporte
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                delegaciones.forEach { delegacion ->
-                                    Tab(
-                                        selected = selectedDelegation?.id == delegacion.id,
-                                        onClick = { selectedDelegation = delegacion },
-                                        selectedContentColor = NictraBlue,
-                                        unselectedContentColor = Color.Gray,
-                                        text = {
-                                            Text(
-                                                delegacion.nombreOficina,
-                                                maxLines = 1,
-                                                fontSize = 13.sp,
-                                                fontWeight = if (selectedDelegation?.id == delegacion.id) FontWeight.Bold else FontWeight.Normal
-                                            )
-                                        }
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        "Ruta a ${delegation.nombreOficina}",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = NictraBlue,
+                                        maxLines = 1
                                     )
-                                }
-                            }
-                        }
-                    }
-
-                    // Indicador Offline
-                    if (isMapOffline || isHopperReady) {
-                        Surface(
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(top = 115.dp, end = 12.dp),
-                            color = NictraGreen.copy(alpha = 0.9f),
-                            shape = RoundedCornerShape(16.dp),
-                            tonalElevation = 0.dp
-                        ) {
-                            Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.CloudOff, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Offline", color = Color.White, style = MaterialTheme.typography.labelSmall)
-                            }
-                        }
-                    }
-
-                    // Botón Mi Ubicación
-                    FloatingActionButton(
-                        onClick = {
-                            if (hasLocationPermission) {
-                                locationOverlay.myLocation?.let { mapView.controller.animateTo(it) }
-                                ?: Toast.makeText(context, "Buscando GPS...", Toast.LENGTH_SHORT).show()
-                            } else launcher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
-                        },
-                        modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 90.dp, end = 16.dp),
-                        containerColor = Color.White,
-                        contentColor = NictraBlue
-                    ) { Icon(Icons.Default.MyLocation, contentDescription = "Mi Ubicación") }
-
-                    // Panel de Ruta (Inferior)
-                    if (isHopperReady && selectedDelegation != null) {
-                        Surface(
-                            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            shadowElevation = 10.dp,
-                            color = Color.White,
-                            tonalElevation = 0.dp
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text("Ruta a ${selectedDelegation?.nombreOficina}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = NictraBlue, maxLines = 1)
-                                        routeInfo?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = NictraBlue) }
+                                    routeInfo?.let {
+                                        Text(it, style = MaterialTheme.typography.bodySmall, color = NictraBlue)
                                     }
-                                    Row {
-                                        profileIcons.forEach { (profile, icon) ->
-                                            IconButton(
-                                                onClick = { selectedProfile = profile },
-                                                colors = IconButtonDefaults.iconButtonColors(
-                                                    containerColor = if (selectedProfile == profile) NictraBlue.copy(alpha = 0.12f) else Color.Transparent,
-                                                    contentColor = if (selectedProfile == profile) NictraBlue else Color.Gray
-                                                )
-                                            ) { Icon(icon, contentDescription = profile) }
+                                }
+                                
+                                // Selectores de Perfil
+                                Row {
+                                    profileIcons.forEach { (profile, icon) ->
+                                        IconButton(
+                                            onClick = { 
+                                                selectedProfile = profile
+                                                routePoints = null
+                                                routeInfo = null
+                                            },
+                                            colors = IconButtonDefaults.iconButtonColors(
+                                                containerColor = if (selectedProfile == profile) NictraBlue.copy(alpha = 0.12f) else Color.Transparent,
+                                                contentColor = if (selectedProfile == profile) NictraBlue else Color.Gray
+                                            )
+                                        ) {
+                                            Icon(icon, contentDescription = profile)
                                         }
                                     }
                                 }
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Button(
-                                    onClick = {
-                                        scope.launch(Dispatchers.IO) {
-                                            val myLoc = locationOverlay.myLocation
-                                            if (myLoc != null) {
-                                                isRouting = true
-                                                val req = GHRequest(myLoc.latitude, myLoc.longitude, selectedDelegation!!.latitud, selectedDelegation!!.longitud)
-                                                    .setProfile(selectedProfile).setLocale(Locale.getDefault())
-                                                try {
-                                                    val rsp = hopper.route(req)
-                                                    if (!rsp.hasErrors()) {
-                                                        val path = rsp.best
-                                                        val dist = String.format(Locale.getDefault(), "%.2f km", path.distance / 1000)
-                                                        val time = String.format(Locale.getDefault(), "%d min", path.time / 60000)
-                                                        withContext(Dispatchers.Main) {
-                                                            routeInfo = "$dist - $time"
-                                                            val line = Polyline()
-                                                            val geoPoints = ArrayList<GeoPoint>()
-                                                            for (i in 0 until path.points.size()) geoPoints.add(GeoPoint(path.points.getLat(i), path.points.getLon(i)))
-                                                            line.setPoints(geoPoints)
-                                                            line.outlinePaint.color = android.graphics.Color.BLUE
-                                                            line.outlinePaint.strokeWidth = 10f
-                                                            mapView.overlays.removeAll { it is Polyline }
-                                                            mapView.overlays.add(line)
-                                                            mapView.invalidate()
-                                                        }
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // Botón de Acción
+                            Button(
+                                onClick = {
+                                    scope.launch(Dispatchers.IO) {
+                                        val myLoc = locationOverlay.myLocation
+                                        if (myLoc != null) {
+                                            isRouting = true
+                                            val req = GHRequest(
+                                                myLoc.latitude, myLoc.longitude,
+                                                selectedDelegation!!.latitud, selectedDelegation!!.longitud
+                                            ).setProfile(selectedProfile).setLocale(Locale.getDefault())
+
+                                            try {
+                                                val rsp = hopper.route(req)
+                                                if (!rsp.hasErrors()) {
+                                                    val path = rsp.best
+                                                    val dist = String.format(Locale.getDefault(), "%.2f km", path.distance / 1000)
+                                                    val time = String.format(Locale.getDefault(), "%d min", path.time / 60000)
+                                                    
+                                                    val geoPoints = ArrayList<GeoPoint>()
+                                                    for (i in 0 until path.points.size()) {
+                                                        geoPoints.add(GeoPoint(path.points.getLat(i), path.points.getLon(i)))
                                                     }
-                                                } catch (e: Exception) { Log.e("NicTra", "Routing Error", e) }
-                                                finally { isRouting = false }
-                                            } else {
-                                                withContext(Dispatchers.Main) { Toast.makeText(context, "Habilite el GPS para calcular la ruta", Toast.LENGTH_LONG).show() }
+
+                                                    withContext(Dispatchers.Main) {
+                                                        routeInfo = "$dist - $time"
+                                                        routePoints = geoPoints
+                                                        mapView.invalidate()
+                                                    }
+                                                } else {
+                                                    val errorMsg = rsp.errors.joinToString { it.message ?: it.toString() }
+                                                    Log.e("NicTra", "Routing Error: $errorMsg")
+                                                    withContext(Dispatchers.Main) {
+                                                        Toast.makeText(context, "No se encontró ruta: ${rsp.errors[0].message ?: "Error desconocido"}", Toast.LENGTH_LONG).show()
+                                                    }
+                                                }
+                                            } catch (e: Exception) {
+                                                Log.e("NicTra", "Routing Exception", e)
+                                            } finally {
+                                                isRouting = false
+                                            }
+                                        } else {
+                                            withContext(Dispatchers.Main) {
+                                                Toast.makeText(context, "Habilite el GPS para calcular la ruta", Toast.LENGTH_LONG).show()
                                             }
                                         }
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    enabled = !isRouting,
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = NictraBlue, contentColor = Color.White)
-                                ) {
-                                    if (isRouting) CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
-                                    else {
-                                        Icon(Icons.Default.Directions, contentDescription = null)
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text("Calcular Ruta Offline")
                                     }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !isRouting && isHopperReady,
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = NictraBlue,
+                                    contentColor = Color.White
+                                )
+                            ) {
+                                if (isRouting) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
+                                } else {
+                                    Icon(Icons.Default.Directions, contentDescription = null)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Calcular Ruta Offline")
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            // Overlay de Carga Inicial
+            if (isPreparingData) {
+                Box(
+                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)).zIndex(10f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator(color = NictraBlue)
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text("Preparando mapas offline...", fontWeight = FontWeight.Medium)
                         }
                     }
                 }
@@ -463,9 +489,13 @@ fun MapScreen(
 private fun findGraphHopperDataFolder(root: File): File? {
     if (root.exists() && root.isDirectory) {
         val children = root.list() ?: emptyArray()
-        if (children.contains("nodes") || children.contains("edges") || children.contains("properties")) return root
+        if (children.contains("nodes") || children.contains("edges") || children.contains("properties")) {
+            return root
+        }
         val graphCache = File(root, "graph-cache")
-        if (graphCache.exists() && graphCache.isDirectory) return graphCache
+        if (graphCache.exists() && graphCache.isDirectory) {
+            return graphCache
+        }
         val files = root.listFiles()
         if (files != null) {
             for (file in files) {
@@ -481,38 +511,64 @@ private fun findGraphHopperDataFolder(root: File): File? {
 
 private fun prepareOfflineFiles(context: Context) {
     val baseDir = context.getExternalFilesDir(null) ?: context.filesDir
+    
+    // 1. Preparar MBTiles para osmdroid
     val osmDir = File(baseDir, "osmdroid")
     if (!osmDir.exists()) osmDir.mkdirs()
     val mapFile = File(osmDir, "leon.mbtiles")
+    
+    // Eliminar si existe pero está vacío para forzar nueva copia
+    if (mapFile.exists() && mapFile.length() == 0L) {
+        mapFile.delete()
+    }
+
     if (!mapFile.exists()) {
         try {
-            context.assets.open("osmdroid/leon.mbtiles").use { input ->
-                FileOutputStream(mapFile).use { output -> input.copyTo(output) }
+            Log.d("NicTra", "Copiando leon.mbtiles desde assets...")
+            context.assets.open("leon.mbtiles").use { input ->
+                FileOutputStream(mapFile).use { output ->
+                    input.copyTo(output)
+                }
             }
-        } catch (e: Exception) { }
+            Log.d("NicTra", "Copia exitosa de leon.mbtiles. Tamaño: ${mapFile.length()}")
+        } catch (e: Exception) {
+            Log.e("NicTra", "Error copiando mapa desde assets", e)
+        }
     }
+
+    // 2. Preparar GraphHopper Cache
     val ghDir = File(baseDir, "graphhopper")
     if (!ghDir.exists()) {
         ghDir.mkdirs()
-        try { copyAssetFolder(context, "graphhopper", ghDir.absolutePath) } catch (e: Exception) { }
+        try {
+            copyAssetFolder(context, "graphhopper", ghDir.absolutePath)
+        } catch (e: Exception) {
+            Log.e("NicTra", "Error copiando graphhopper data", e)
+        }
     }
 }
 
 private fun copyAssetFolder(context: Context, assetName: String, outputPath: String) {
     val assetManager = context.assets
     val files = assetManager.list(assetName) ?: return
+    
     File(outputPath).mkdirs()
     for (file in files) {
         val fullAssetName = "$assetName/$file"
         val fullOutputPath = "$outputPath/$file"
         val subFiles = assetManager.list(fullAssetName)
-        if (subFiles != null && subFiles.isNotEmpty()) copyAssetFolder(context, fullAssetName, fullOutputPath)
-        else {
+        if (subFiles != null && subFiles.isNotEmpty()) {
+            copyAssetFolder(context, fullAssetName, fullOutputPath)
+        } else {
             try {
                 assetManager.open(fullAssetName).use { input ->
-                    FileOutputStream(fullOutputPath).use { output -> input.copyTo(output) }
+                    FileOutputStream(fullOutputPath).use { output ->
+                        input.copyTo(output)
+                    }
                 }
-            } catch (e: Exception) { }
+            } catch (e: Exception) {
+                Log.e("NicTra", "Error copiando archivo $file", e)
+            }
         }
     }
 }
