@@ -1,0 +1,12 @@
+{{template "head" .}}
+<h1>Panel de administración</h1>
+<p class="muted">Administra el contenido que alimenta la app. La API pública es de solo lectura.</p>
+<div class="cards">
+  {{range .Entities}}
+  <a class="card" href="/admin/{{.Slug}}">
+    <span class="count">{{index $.Counts .Slug}}</span>
+    <span class="label">{{.Label}}</span>
+  </a>
+  {{end}}
+</div>
+{{template "footer"}}

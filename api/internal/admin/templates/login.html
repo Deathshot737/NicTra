@@ -1,0 +1,13 @@
+{{template "barehead" .}}
+<div class="login-card">
+  <h1>Feed Admin</h1>
+  <p class="muted">Ingresa el token de administración.</p>
+  {{if .Error}}<div class="err">Token inválido.</div>{{end}}
+  <form method="post" action="/admin/login">
+    <label><span>Token</span>
+      <input type="password" name="token" autofocus required>
+    </label>
+    <button type="submit">Entrar</button>
+  </form>
+</div>
+{{template "footer"}}

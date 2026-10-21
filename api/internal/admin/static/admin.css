@@ -1,0 +1,208 @@
+:root {
+  --bg: #0f1420;
+  --panel: #161d2e;
+  --panel-2: #1e2740;
+  --line: #2a3350;
+  --fg: #e6ecff;
+  --muted: #93a0c2;
+  --accent: #5b8cff;
+  --ok: #2fbf71;
+  --danger: #ff6b6b;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 20px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; color: var(--fg); }
+.topbar nav { display: flex; gap: 14px; flex-wrap: wrap; flex: 1; }
+.topbar nav a { color: var(--muted); }
+.topbar nav a:hover { color: var(--fg); text-decoration: none; }
+.logout { margin: 0; }
+.logout button { background: transparent; border: 1px solid var(--line); color: var(--muted); }
+
+main { max-width: 1000px; margin: 0 auto; padding: 24px 20px 60px; }
+
+h1 { font-size: 1.4rem; margin: 10px 0 4px; }
+.muted { color: var(--muted); }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+  margin-top: 22px;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--fg);
+  transition: transform .08s ease, border-color .12s ease;
+}
+.card:hover { transform: translateY(-2px); border-color: var(--accent); text-decoration: none; }
+.card .count { font-size: 1.8rem; font-weight: 700; }
+.card .label { color: var(--muted); font-size: .95rem; }
+
+.row-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+.panel {
+  margin-top: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+.panel .grid {
+  margin-top: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+.panel .grid thead th:first-child { border-top-left-radius: 8px; }
+.panel .grid thead th:last-child { border-top-right-radius: 8px; }
+.panel .grid tbody tr:last-child td:first-child { border-bottom-left-radius: 8px; }
+.panel .grid tbody tr:last-child td:last-child { border-bottom-right-radius: 8px; }
+.panel .muted { display: block; margin: 2px 0; }
+.stack.panel { max-width: 620px; padding: 18px 20px; }
+.table-wrap { overflow-x: auto; }
+
+.grid {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.grid th, .grid td {
+  padding: 9px 11px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  font-size: .92rem;
+  vertical-align: top;
+}
+.grid th { background: var(--panel-2); color: var(--muted); font-weight: 600; }
+.grid tr:last-child td { border-bottom: none; }
+.actions { white-space: nowrap; }
+.actions form { display: inline; margin-left: 8px; }
+
+.btn, button[type="submit"] {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: .92rem;
+  cursor: pointer;
+}
+button[type="submit"]:hover { filter: brightness(1.08); }
+.logout button, .lnk {
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: .9rem;
+  cursor: pointer;
+}
+.lnk { color: var(--accent); background: transparent; border: 1px solid var(--line); display: inline-block; }
+.lnk.danger { color: var(--danger); }
+.lnk:hover { text-decoration: none; border-color: currentColor; }
+
+.ok {
+  background: rgba(47, 191, 113, .12);
+  border: 1px solid var(--ok);
+  color: var(--ok);
+  padding: 9px 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+.err {
+  background: rgba(255, 107, 107, .12);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  padding: 9px 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.stack { display: flex; flex-direction: column; gap: 14px; max-width: 560px; margin-top: 14px; }
+.stack label { display: flex; flex-direction: column; gap: 5px; font-size: .95rem; }
+.stack label > span { color: var(--muted); }
+.stack input[type="text"],
+.stack input[type="number"],
+.stack input[type="password"],
+.stack textarea,
+.stack select {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--fg);
+  padding: 9px 10px;
+  font-size: .95rem;
+  font-family: inherit;
+}
+.stack textarea { resize: vertical; }
+.check { display: flex; align-items: center; gap: 8px; }
+.form-actions { display: flex; gap: 12px; align-items: center; margin-top: 6px; }
+abbr { color: var(--accent); }
+
+.login-body { display: flex; }
+.login-main { margin: auto; padding: 40px 20px; width: 100%; }
+.login-card {
+  max-width: 360px;
+  margin: 0 auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 28px;
+}
+.login-card h1 { margin-top: 0; }
+.login-card form { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+.login-card label { display: flex; flex-direction: column; gap: 6px; }
+.login-card input {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--fg);
+  padding: 10px;
+}
+
+@media (max-width: 720px) {
+  .topbar { gap: 10px; padding: 10px 14px; }
+  .topbar nav { order: 3; flex-basis: 100%; gap: 10px; }
+  main { padding: 16px 12px 48px; }
+  h1 { font-size: 1.2rem; }
+  .row-head { flex-wrap: wrap; }
+  .row-head .btn { padding: 7px 12px; }
+  .cards { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .card { padding: 14px; }
+  .card .count { font-size: 1.5rem; }
+  .panel { margin-top: 12px; padding: 12px; border-radius: 10px; }
+  .table-wrap .grid { min-width: 520px; }
+  .grid th, .grid td { padding: 8px; font-size: .88rem; }
+  .stack.panel { max-width: none; padding: 14px; }
+  .stack { max-width: none; }
+  .login-main { padding: 20px 12px; }
+  .login-card { padding: 22px; }
+}

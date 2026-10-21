@@ -1,0 +1,48 @@
+{{template "head" .}}
+{{if .Flash}}<div class="ok">{{.Flash}}</div>{{end}}
+{{if .Err}}<div class="err">{{.Err}}</div>{{end}}
+<div class="row-head">
+  <h1>{{.Title}}</h1>
+  {{if not .Entity.IsJoin}}<a class="btn" href="/admin/{{.Entity.Slug}}/new">+ Nuevo</a>{{end}}
+</div>
+{{if .Rows}}
+<div class="panel">
+<div class="table-wrap">
+<table class="grid">
+  <thead>
+    <tr>
+      {{range .Entity.Fields}}<th>{{.Label}}</th>{{end}}
+      <th class="actions-col"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {{range .Rows}}
+    {{$row := .}}
+    <tr>
+      {{range $.Entity.Fields}}<td>{{val $row .Name}}</td>{{end}}
+      <td class="actions">
+        {{if not $.Entity.IsJoin}}
+        <a class="lnk" href="/admin/{{$.Entity.Slug}}/edit?id={{val $row $.Entity.IDField}}">Editar</a>
+        {{end}}
+        <form method="post" action="/admin/{{$.Entity.Slug}}/delete" onsubmit="return confirm('¿Eliminar este registro?')">
+          {{range $.Entity.Fields}}{{if eq .Type "select"}}
+          <input type="hidden" name="{{.Name}}" value="{{val $row .Name}}">
+          {{end}}{{end}}
+          {{if not $.Entity.IsJoin}}
+          <input type="hidden" name="{{$.Entity.IDField}}" value="{{val $row $.Entity.IDField}}">
+          {{end}}
+          <button type="submit" class="lnk danger">Eliminar</button>
+        </form>
+      </td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+</div>
+</div>
+{{else}}
+<div class="panel">
+<p class="muted">Sin registros. {{if not .Entity.IsJoin}}<a href="/admin/{{.Entity.Slug}}/new">Crear el primero</a>{{end}}</p>
+</div>
+{{end}}
+{{template "footer"}}

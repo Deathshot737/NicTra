@@ -1,0 +1,39 @@
+{{define "head"}}
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}} · Feed Admin</title>
+<link rel="stylesheet" href="/admin/static/admin.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/admin">Feed&nbsp;Admin</a>
+  <nav>
+    <a href="/admin">Inicio</a>
+    {{range .Entities}}<a href="/admin/{{.Slug}}">{{.Label}}</a>{{end}}
+  </nav>
+  <form method="post" action="/admin/logout" class="logout"><button type="submit">Salir</button></form>
+</header>
+<main>
+{{end}}
+
+{{define "barehead"}}
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acceso · Feed Admin</title>
+<link rel="stylesheet" href="/admin/static/admin.css">
+</head>
+<body class="login-body">
+<main class="login-main">
+{{end}}
+
+{{define "footer"}}
+</main>
+</body>
+</html>
+{{end}}

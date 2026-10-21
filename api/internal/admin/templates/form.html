@@ -1,0 +1,40 @@
+{{template "head" .}}
+{{if .Err}}<div class="err">{{.Err}}</div>{{end}}
+<div class="row-head">
+  <h1>{{if .IsEdit}}Editar{{else}}Nuevo{{end}} · {{.Title}}</h1>
+</div>
+<form method="post" action="/admin/{{.Entity.Slug}}/{{if .IsEdit}}edit{{else}}new{{end}}" class="stack panel">
+  {{if .IsEdit}}
+  <input type="hidden" name="{{.Entity.IDField}}" value="{{val .Item .Entity.IDField}}">
+  {{end}}
+  {{range .Fields}}
+  {{$f := .}}
+  <label>
+    <span>{{$f.Label}}{{if $f.Required}} <abbr title="requerido">*</abbr>{{end}}</span>
+    {{if eq $f.Type "textarea"}}
+      <textarea name="{{$f.Name}}" rows="3" {{if $f.Required}}required{{end}}>{{val $.Item $f.Name}}</textarea>
+    {{else if eq $f.Type "select"}}
+      <select name="{{$f.Name}}" {{if $f.Required}}required{{end}}>
+        <option value="">— seleccionar —</option>
+        {{range (index $.Options $f.Name)}}
+        <option value="{{.Value}}" {{if sel $.Item $f.Name .Value}}selected{{end}}>{{.Label}}</option>
+        {{end}}
+      </select>
+    {{else if eq $f.Type "checkbox"}}
+      <span class="check"><input type="checkbox" name="{{$f.Name}}" {{if checked $.Item $f.Name}}checked{{end}}> Sí</span>
+    {{else if eq $f.Type "int"}}
+      <input type="number" step="1" name="{{$f.Name}}" value="{{val $.Item $f.Name}}" {{if $f.Required}}required{{end}}>
+    {{else if eq $f.Type "number"}}
+      <input type="number" step="any" name="{{$f.Name}}" value="{{val $.Item $f.Name}}" {{if $f.Required}}required{{end}}>
+    {{else}}
+      <input type="text" name="{{$f.Name}}" value="{{val $.Item $f.Name}}" {{if $f.Required}}required{{end}}>
+    {{end}}
+    {{if $f.Help}}<small class="muted">{{$f.Help}}</small>{{end}}
+  </label>
+  {{end}}
+  <div class="form-actions">
+    <button type="submit">Guardar</button>
+    <a href="/admin/{{.Entity.Slug}}" class="lnk">Cancelar</a>
+  </div>
+</form>
+{{template "footer"}}
