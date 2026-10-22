@@ -1,12 +1,16 @@
 package com.nictra.data.repository
 
+import com.nictra.data.local.SyncPreferences
 import com.nictra.data.local.dao.TramiteDao
 import com.nictra.data.local.entities.*
 import kotlinx.coroutines.flow.Flow
 
 class TramiteRepository(
-    private val tramiteDao: TramiteDao
+    private val tramiteDao: TramiteDao,
+    private val syncPreferences: SyncPreferences
 ) {
+    val lastSyncDate: Flow<String?> = syncPreferences.ultimaActualizacion
+
     fun getAllCategorias(): Flow<List<CategoriaEntity>> = tramiteDao.getAllCategorias()
 
     fun getTramitesByCategoria(categoriaId: String): Flow<List<TramiteEntity>> = 

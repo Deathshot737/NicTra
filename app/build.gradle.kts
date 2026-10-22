@@ -19,6 +19,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField("String", "BASE_URL", "\"http://192.168.1.8:80\"")
     }
 
     buildTypes {
@@ -28,6 +30,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "BASE_URL", "\"http://192.168.1.8:80\"")
+        }
+        debug {
+            buildConfigField("String", "BASE_URL", "\"http://192.168.1.8:80\"")
         }
     }
     compileOptions {
@@ -40,6 +46,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.8"
@@ -84,6 +91,14 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
+    // Retrofit & Networking
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.gson)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
 
     // Desugaring
     coreLibraryDesugaring(libs.desugar.jdk.libs)

@@ -25,6 +25,57 @@ interface TramiteDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDelegacionTramiteCrossRefs(crossRefs: List<DelegacionTramiteCrossRef>)
 
+    @Query("DELETE FROM categorias WHERE id NOT IN (:ids)")
+    suspend fun deleteCategoriasExcept(ids: List<String>)
+
+    @Query("DELETE FROM tramites WHERE id NOT IN (:ids)")
+    suspend fun deleteTramitesExcept(ids: List<String>)
+
+    @Query("DELETE FROM requisitos WHERE id NOT IN (:ids)")
+    suspend fun deleteRequisitosExcept(ids: List<String>)
+
+    @Query("DELETE FROM pasos WHERE id NOT IN (:ids)")
+    suspend fun deletePasosExcept(ids: List<String>)
+
+    @Query("DELETE FROM delegaciones WHERE id NOT IN (:ids)")
+    suspend fun deleteDelegacionesExcept(ids: List<String>)
+
+    @Query("DELETE FROM delegacion_tramites")
+    suspend fun deleteAllDelegacionTramites()
+
+    @Query("SELECT * FROM tramites")
+    suspend fun getAllTramitesList(): List<TramiteEntity>
+
+    @Query("SELECT * FROM requisitos")
+    suspend fun getAllRequisitosList(): List<RequisitoEntity>
+
+    @Transaction
+    suspend fun applySnapshot(
+        categorias: List<CategoriaEntity>,
+        tramites: List<TramiteEntity>,
+        requisitos: List<RequisitoEntity>,
+        pasos: List<PasoEntity>,
+        delegaciones: List<DelegacionEntity>,
+        crossRefs: List<DelegacionTramiteCrossRef>
+    ) {
+        // 1. UPSERT (INSERT OR REPLACE)
+        insertCategorias(categorias)
+        insertTramites(tramites)
+        insertRequisitos(requisitos)
+        insertPasos(pasos)
+        insertDelegaciones(delegaciones)
+        
+        deleteAllDelegacionTramites()
+        insertDelegacionTramiteCrossRefs(crossRefs)
+
+        // 2. RECONCILIACIÓN
+        deletePasosExcept(pasos.map { it.id })
+        deleteRequisitosExcept(requisitos.map { it.id })
+        deleteTramitesExcept(tramites.map { it.id })
+        deleteCategoriasExcept(categorias.map { it.id })
+        deleteDelegacionesExcept(delegaciones.map { it.id })
+    }
+
     @Query("SELECT * FROM categorias")
     fun getAllCategorias(): Flow<List<CategoriaEntity>>
 

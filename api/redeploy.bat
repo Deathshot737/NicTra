@@ -14,12 +14,21 @@ if %errorlevel%==0 (
 echo Building %IMAGE%...
 docker build -t %IMAGE% . || goto :fail
 
-rem Remove old container if present
-docker ps -a --format "{{.Names}}" | findstr /x /c:"%CONTAINER%" >nul
-if %errorlevel%==0 (
-  echo Removing old container %CONTAINER%...
-  docker rm -f %CONTAINER% >nul
+rem Forzar limpieza total del contenedor por nombre Y por ID si estuviera colgado
+docker ps -a --filter "name=^/%CONTAINER%$" --format "{{.ID}}" > container_id.tmp
+set /p TARGET_ID=<container_id.tmp
+del container_id.tmp
+
+if not "!TARGET_ID!"=="" (
+  echo Removing locked container !TARGET_ID! (%CONTAINER%)...
+  docker rm -f !TARGET_ID! >nul 2>&1
 )
+
+rem Fallback por si acaso el nombre sigue retenido
+docker rm -f %CONTAINER% >nul 2>&1
+
+rem Breve pausa de seguridad para Windows
+timeout /t 2 /nobreak >nul
 
 rem Remove the previous image now that the rebuild is done
 if defined OLD_IMAGE (

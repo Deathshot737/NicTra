@@ -3,6 +3,7 @@ package com.nictra
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -16,10 +17,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.nictra.data.local.AppDatabase
+import com.nictra.data.local.SyncPreferences
 import com.nictra.data.local.entities.CategoriaEntity
 import com.nictra.data.local.entities.TramiteEntity
+import com.nictra.data.remote.NetworkModule
+import com.nictra.data.repository.SyncRepository
 import com.nictra.data.repository.TramiteRepository
 import com.nictra.ui.home.HomeScreen
 import com.nictra.ui.map.MapScreen
@@ -42,14 +47,14 @@ private val NicTraColorScheme = lightColorScheme(
     onPrimaryContainer = NictraBlue,
     secondary = NictraGreen,
     onSecondary = Color.White,
-    secondaryContainer = NictraBlue.copy(alpha = 0.12f), // Color de la píldora de selección (NO MORADO)
+    secondaryContainer = NictraBlue.copy(alpha = 0.12f),
     onSecondaryContainer = NictraBlue,
     tertiary = Color(0xFFFBC02D),
     surface = Color.White,
     onSurface = Color(0xFF1C1B1F),
     background = NictraBackground,
     surfaceVariant = Color.White,
-    surfaceTint = Color.Transparent // Desactiva el tinte morado por elevación
+    surfaceTint = Color.Transparent
 )
 
 @Composable
@@ -76,7 +81,14 @@ class MainActivity : ComponentActivity() {
         Configuration.getInstance().userAgentValue = packageName
 
         val db = AppDatabase.getDatabase(applicationContext, lifecycleScope)
-        val repository = TramiteRepository(db.tramiteDao())
+        val syncPrefs = SyncPreferences(applicationContext)
+        val repository = TramiteRepository(db.tramiteDao(), syncPrefs)
+        val syncRepository = SyncRepository(NetworkModule.apiService, db.tramiteDao(), syncPrefs)
+
+        // Lanzar sincronización al arrancar
+        lifecycleScope.launch {
+            syncRepository.syncFeed()
+        }
 
         setContent {
             var showWelcome by remember { mutableStateOf(true) }
@@ -88,6 +100,7 @@ class MainActivity : ComponentActivity() {
             
             var searchQuery by remember { mutableStateOf("") }
             val searchResults by repository.searchTramites(searchQuery).collectAsState(initial = emptyList())
+            val lastSyncDate by repository.lastSyncDate.collectAsState(initial = null)
 
             NicTraTheme {
                 Surface(
@@ -191,12 +204,18 @@ class MainActivity : ComponentActivity() {
                                 recentTramites = recentTramites,
                                 searchResults = searchResults,
                                 searchQuery = searchQuery,
+                                lastSyncDate = lastSyncDate,
                                 onSearchQueryChange = { searchQuery = it },
                                 completedCount = completedCount,
                                 onCategoryClick = { selectedCategory = it },
                                 onTramiteClick = { selectedTramiteId = it },
                                 onMyTramitesClick = { showMyTramites = true },
-                                onMapClick = { showMap = true }
+                                onMapClick = { showMap = true },
+                                onSyncClick = {
+                                    lifecycleScope.launch {
+                                        syncRepository.syncFeed(force = true)
+                                    }
+                                }
                             )
                         }
                     }

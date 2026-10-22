@@ -21,6 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nictra.data.local.entities.CategoriaEntity
 import com.nictra.data.local.entities.TramiteEntity
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,12 +34,14 @@ fun HomeScreen(
     recentTramites: List<TramiteEntity>,
     searchResults: List<TramiteEntity>,
     searchQuery: String,
+    lastSyncDate: String?,
     onSearchQueryChange: (String) -> Unit,
     completedCount: Int,
     onCategoryClick: (CategoriaEntity) -> Unit,
     onTramiteClick: (String) -> Unit,
     onMyTramitesClick: () -> Unit,
-    onMapClick: () -> Unit
+    onMapClick: () -> Unit,
+    onSyncClick: () -> Unit
 ) {
     Scaffold(
         bottomBar = {
@@ -80,6 +86,11 @@ fun HomeScreen(
         ) {
             item {
                 HeaderSection(searchQuery, onSearchQueryChange)
+            }
+
+            // Barra de estado de sincronización
+            item {
+                SyncStatusBanner(lastSyncDate, onSyncClick)
             }
 
             if (searchQuery.isNotEmpty()) {
@@ -128,6 +139,58 @@ fun HomeScreen(
             }
             item {
                 Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun SyncStatusBanner(lastSyncDate: String?, onSyncClick: () -> Unit) {
+    val formattedDate = remember(lastSyncDate) {
+        if (lastSyncDate != null) {
+            try {
+                val zdt = ZonedDateTime.parse(lastSyncDate)
+                zdt.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault()))
+            } catch (e: Exception) {
+                lastSyncDate
+            }
+        } else {
+            "Nunca sincronizado"
+        }
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = Color.White,
+        shadowElevation = 1.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Contenido actualizado el:",
+                    fontSize = 11.sp,
+                    color = Color.Gray
+                )
+                Text(
+                    text = formattedDate,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.DarkGray
+                )
+            }
+            IconButton(onClick = onSyncClick) {
+                Icon(
+                    Icons.Default.Refresh, 
+                    contentDescription = "Sincronizar ahora",
+                    tint = Color(0xFF1A3B70),
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
     }
