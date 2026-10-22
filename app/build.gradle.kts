@@ -64,6 +64,15 @@ android {
             excludes += "META-INF/*.kotlin_module"
         }
     }
+
+    applicationVariants.all {
+        outputs.all {
+            val output = this as? com.android.build.gradle.api.ApkVariantOutput
+            if (output != null && buildType.name == "debug") {
+                output.outputFileName = "Nictra.apk"
+            }
+        }
+    }
 }
 
 dependencies {
