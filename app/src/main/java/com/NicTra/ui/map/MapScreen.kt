@@ -17,7 +17,6 @@ import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -26,7 +25,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
@@ -43,7 +41,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.modules.OfflineTileProvider
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.tileprovider.util.SimpleRegisterReceiver
 import org.osmdroid.util.GeoPoint
@@ -113,7 +110,6 @@ fun MapScreen(
         Configuration.getInstance().osmdroidBasePath = baseDir
         Configuration.getInstance().osmdroidTileCache = File(baseDir, "osmdroid")
         
-        // Cargar configuración de osmdroid
         Configuration.getInstance().load(context, context.getSharedPreferences("osmdroid", Context.MODE_PRIVATE))
 
         MapView(context).apply {
@@ -121,7 +117,7 @@ fun MapScreen(
             zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
             controller.setZoom(15.0)
             controller.setCenter(leonCenter)
-            setUseDataConnection(false) // Deshabilitar conexión de datos para asegurar modo offline
+            setUseDataConnection(false)
         }
     }
 
@@ -145,19 +141,13 @@ fun MapScreen(
                     try {
                         val offlineProvider = OfflineTileProvider(SimpleRegisterReceiver(context), arrayOf(mapFile))
                         mapView.tileProvider = offlineProvider
-                        
-                        // Fuente de teselas para el archivo MBTiles (Mapnik es común en mbtiles)
                         val source = XYTileSource("Mapnik", 0, 22, 256, ".png", arrayOf())
                         mapView.setTileSource(source)
                         isMapOffline = true
                         Log.d("NicTra", "Mapa offline leon.mbtiles cargado correctamente")
                     } catch (e: Exception) {
                         Log.e("NicTra", "Error cargando mapa offline", e)
-                        Toast.makeText(context, "Error cargando mapa offline", Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    Log.e("NicTra", "Archivo leon.mbtiles no encontrado en: ${mapFile.absolutePath}")
-                    Toast.makeText(context, "Mapa offline no disponible", Toast.LENGTH_LONG).show()
                 }
                 mapView.invalidate()
             }
@@ -168,19 +158,28 @@ fun MapScreen(
                     val config = GraphHopperConfig()
                     config.putObject("datareader.file", "")
                     config.putObject("graph.location", ghDataFolder.absolutePath)
+                    config.putObject("graph.flag_encoders", "car,foot,bike")
+                    config.putObject("graph.dataaccess", "ram")
                     
                     val profiles = ArrayList<Profile>()
-                    // Ajustado para GraphHopper 11.1 (vehicle se infiere o se omite si ya está en el grafo)
-                    profiles.add(Profile("car").setWeighting("fastest"))
-                    profiles.add(Profile("foot").setWeighting("fastest"))
-                    profiles.add(Profile("bike").setWeighting("fastest"))
+                    profiles.add(Profile("car").setVehicle("car").setWeighting("fastest"))
+                    profiles.add(Profile("foot").setVehicle("foot").setWeighting("fastest"))
+                    profiles.add(Profile("bike").setVehicle("bike").setWeighting("fastest"))
                     config.setProfiles(profiles)
 
                     hopper.init(config)
                     hopper.setAllowWrites(false)
-                    val loaded = hopper.load()
-                    withContext(Dispatchers.Main) { isHopperReady = loaded }
-                } catch (e: Exception) { Log.e("NicTra", "Hopper Error", e) }
+                    val loaded = hopper.load(ghDataFolder.absolutePath)
+                    withContext(Dispatchers.Main) { 
+                        isHopperReady = loaded
+                        if (loaded) Log.i("NicTra", "GraphHopper cargado correctamente")
+                        else Log.e("NicTra", "GraphHopper no pudo cargar los datos")
+                    }
+                } catch (e: Exception) { 
+                    Log.e("NicTra", "Hopper Error al inicializar/cargar", e)
+                }
+            } else {
+                Log.e("NicTra", "No se encontró la carpeta de datos de GraphHopper")
             }
             withContext(Dispatchers.Main) { isPreparingData = false }
         }
@@ -225,7 +224,7 @@ fun MapScreen(
         bottomBar = {
             NavigationBar(
                 containerColor = Color.White, 
-                tonalElevation = 0.dp // Evita el color morado de fondo
+                tonalElevation = 0.dp
             ) {
                 val navBarColors = NavigationBarItemDefaults.colors(
                     selectedIconColor = NictraBlue,
@@ -272,14 +271,12 @@ fun MapScreen(
                 .padding(padding)
                 .background(NictraBackground)
         ) {
-            // CAPA 0: EL MAPA (Fondo siempre)
             AndroidView(
                 factory = { mapView },
                 modifier = Modifier.fillMaxSize().zIndex(0f),
                 update = { mv ->
                     mv.overlays.clear()
                     
-                    // Dibujar la ruta si existe
                     routePoints?.let { points ->
                         val line = Polyline(mv)
                         line.setPoints(points)
@@ -290,7 +287,6 @@ fun MapScreen(
 
                     mv.overlays.add(locationOverlay)
                     
-                    // Marcadores de delegaciones
                     delegaciones.forEach { delegacion ->
                         val marker = Marker(mv).apply {
                             position = GeoPoint(delegacion.latitud, delegacion.longitud)
@@ -308,7 +304,6 @@ fun MapScreen(
                 }
             )
 
-            // CAPA 1: Botón Volver a Mi Ubicación
             FloatingActionButton(
                 onClick = {
                     if (hasLocationPermission) {
@@ -324,7 +319,7 @@ fun MapScreen(
                 },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 16.dp, bottom = 240.dp) // Arriba del panel de info
+                    .padding(end = 16.dp, bottom = 240.dp)
                     .size(48.dp),
                 containerColor = Color.White,
                 contentColor = NictraBlue,
@@ -334,7 +329,6 @@ fun MapScreen(
                 Icon(Icons.Default.MyLocation, contentDescription = "Mi Ubicación")
             }
 
-            // CAPA 2: Panel de Información de Delegación Seleccionada
             selectedDelegation?.let { delegation ->
                 Box(
                     modifier = Modifier
@@ -351,7 +345,6 @@ fun MapScreen(
                         )
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            // Encabezado con perfil de transporte
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -370,7 +363,6 @@ fun MapScreen(
                                     }
                                 }
                                 
-                                // Selectores de Perfil
                                 Row {
                                     profileIcons.forEach { (profile, icon) ->
                                         IconButton(
@@ -392,7 +384,6 @@ fun MapScreen(
 
                             Spacer(modifier = Modifier.height(12.dp))
 
-                            // Botón de Acción
                             Button(
                                 onClick = {
                                     scope.launch(Dispatchers.IO) {
@@ -424,18 +415,11 @@ fun MapScreen(
                                                 } else {
                                                     val errorMsg = rsp.errors.joinToString { it.message ?: it.toString() }
                                                     Log.e("NicTra", "Routing Error: $errorMsg")
-                                                    withContext(Dispatchers.Main) {
-                                                        Toast.makeText(context, "No se encontró ruta: ${rsp.errors[0].message ?: "Error desconocido"}", Toast.LENGTH_LONG).show()
-                                                    }
                                                 }
                                             } catch (e: Exception) {
                                                 Log.e("NicTra", "Routing Exception", e)
                                             } finally {
                                                 isRouting = false
-                                            }
-                                        } else {
-                                            withContext(Dispatchers.Main) {
-                                                Toast.makeText(context, "Habilite el GPS para calcular la ruta", Toast.LENGTH_LONG).show()
                                             }
                                         }
                                     }
@@ -461,7 +445,6 @@ fun MapScreen(
                 }
             }
 
-            // Overlay de Carga Inicial
             if (isPreparingData) {
                 Box(
                     modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)).zIndex(10f),
@@ -512,31 +495,26 @@ private fun findGraphHopperDataFolder(root: File): File? {
 private fun prepareOfflineFiles(context: Context) {
     val baseDir = context.getExternalFilesDir(null) ?: context.filesDir
     
-    // 1. Preparar MBTiles para osmdroid
     val osmDir = File(baseDir, "osmdroid")
     if (!osmDir.exists()) osmDir.mkdirs()
     val mapFile = File(osmDir, "leon.mbtiles")
     
-    // Eliminar si existe pero está vacío para forzar nueva copia
     if (mapFile.exists() && mapFile.length() == 0L) {
         mapFile.delete()
     }
 
     if (!mapFile.exists()) {
         try {
-            Log.d("NicTra", "Copiando leon.mbtiles desde assets...")
             context.assets.open("leon.mbtiles").use { input ->
                 FileOutputStream(mapFile).use { output ->
                     input.copyTo(output)
                 }
             }
-            Log.d("NicTra", "Copia exitosa de leon.mbtiles. Tamaño: ${mapFile.length()}")
         } catch (e: Exception) {
             Log.e("NicTra", "Error copiando mapa desde assets", e)
         }
     }
 
-    // 2. Preparar GraphHopper Cache
     val ghDir = File(baseDir, "graphhopper")
     if (!ghDir.exists()) {
         ghDir.mkdirs()

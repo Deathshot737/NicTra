@@ -20,7 +20,7 @@ android {
             useSupportLibrary = true
         }
 
-        buildConfigField("String", "BASE_URL", "\"http://192.168.1.8:80\"")
+        buildConfigField("String", "BASE_URL", "\"https://finals-advisor-sunrise-mentor.trycloudflare.com\"")
     }
 
     buildTypes {
@@ -30,10 +30,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "BASE_URL", "\"http://192.168.1.8:80\"")
+            buildConfigField("String", "BASE_URL", "\"https://finals-advisor-sunrise-mentor.trycloudflare.com\"")
         }
         debug {
-            buildConfigField("String", "BASE_URL", "\"http://192.168.1.8:80\"")
+            buildConfigField("String", "BASE_URL", "\"https://finals-advisor-sunrise-mentor.trycloudflare.com\"")
         }
     }
     compileOptions {

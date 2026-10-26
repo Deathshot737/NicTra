@@ -18,6 +18,7 @@ class SyncRepository(
     private val syncPreferences: SyncPreferences
 ) {
     private val syncMutex = Mutex()
+    private val FORCED_SYNC_INTERVAL = 24 * 60 * 60 * 1000L // 24 horas en milisegundos
 
     suspend fun syncFeed(force: Boolean = false): Result<Unit> = withContext(Dispatchers.IO) {
         syncMutex.withLock {
@@ -25,22 +26,30 @@ class SyncRepository(
                 // 1. Obtener versión remota
                 val remoteVersionInfo = apiService.getFeedVersion()
                 val localVersion = syncPreferences.feedVersion.first()
+                val lastFullSyncTime = syncPreferences.lastFullSyncTime.first()
+                
+                val isStale = System.currentTimeMillis() - lastFullSyncTime > FORCED_SYNC_INTERVAL
+                val shouldForce = force || isStale
 
                 // 2. Decidir si descargar
-                if (!force && remoteVersionInfo.version == localVersion) {
+                if (!shouldForce && remoteVersionInfo.version == localVersion) {
                     Log.i("SyncRepo", "Feed ya está actualizado (versión: $localVersion)")
                     return@withContext Result.success(Unit)
                 }
 
                 // 3. Descargar snapshot completo
-                Log.i("SyncRepo", "Descargando nuevo feed snapshot...")
+                Log.i("SyncRepo", "Descargando nuevo feed snapshot (Force: $shouldForce)...")
                 val snapshot = apiService.getFeed()
 
                 // 4. Aplicar snapshot preservando estado local
                 applySnapshot(snapshot)
 
-                // 5. Guardar nueva versión
-                syncPreferences.saveSyncInfo(remoteVersionInfo.version, remoteVersionInfo.actualizadoEn)
+                // 5. Guardar nueva versión e info de sync
+                syncPreferences.saveSyncInfo(
+                    version = remoteVersionInfo.version, 
+                    fecha = remoteVersionInfo.actualizadoEn,
+                    fullSync = true
+                )
                 
                 Log.i("SyncRepo", "Sincronización exitosa: ${remoteVersionInfo.version}")
                 Result.success(Unit)

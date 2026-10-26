@@ -3,7 +3,6 @@ package com.nictra
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -17,7 +16,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.nictra.data.local.AppDatabase
 import com.nictra.data.local.SyncPreferences
@@ -35,7 +36,6 @@ import com.nictra.ui.welcome.WelcomeScreen
 import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 
-// Colores de marca NicTra
 private val NictraBlue = Color(0xFF1A3B70)
 private val NictraGreen = Color(0xFF4CAF50)
 private val NictraBackground = Color(0xFFF5F7FA)
@@ -85,12 +85,27 @@ class MainActivity : ComponentActivity() {
         val repository = TramiteRepository(db.tramiteDao(), syncPrefs)
         val syncRepository = SyncRepository(NetworkModule.apiService, db.tramiteDao(), syncPrefs)
 
-        // Lanzar sincronización al arrancar
-        lifecycleScope.launch {
-            syncRepository.syncFeed()
-        }
-
         setContent {
+            val lifecycleOwner = LocalLifecycleOwner.current
+            var isSyncing by remember { mutableStateOf(false) }
+            var syncFailed by remember { mutableStateOf(false) }
+
+            // Observador para sincronizar al entrar en primer plano
+            DisposableEffect(lifecycleOwner) {
+                val observer = LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_RESUME) {
+                        lifecycleScope.launch {
+                            isSyncing = true
+                            val result = syncRepository.syncFeed()
+                            syncFailed = result.isFailure
+                            isSyncing = false
+                        }
+                    }
+                }
+                lifecycleOwner.lifecycle.addObserver(observer)
+                onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+            }
+
             var showWelcome by remember { mutableStateOf(true) }
             var selectedCategory by remember { mutableStateOf<CategoriaEntity?>(null) }
             var selectedTramiteId by remember { mutableStateOf<String?>(null) }
@@ -205,6 +220,8 @@ class MainActivity : ComponentActivity() {
                                 searchResults = searchResults,
                                 searchQuery = searchQuery,
                                 lastSyncDate = lastSyncDate,
+                                isSyncing = isSyncing,
+                                syncFailed = syncFailed,
                                 onSearchQueryChange = { searchQuery = it },
                                 completedCount = completedCount,
                                 onCategoryClick = { selectedCategory = it },
@@ -213,7 +230,10 @@ class MainActivity : ComponentActivity() {
                                 onMapClick = { showMap = true },
                                 onSyncClick = {
                                     lifecycleScope.launch {
-                                        syncRepository.syncFeed(force = true)
+                                        isSyncing = true
+                                        val result = syncRepository.syncFeed(force = true)
+                                        syncFailed = result.isFailure
+                                        isSyncing = false
                                     }
                                 }
                             )
