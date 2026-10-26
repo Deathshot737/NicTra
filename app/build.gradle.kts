@@ -12,15 +12,16 @@ android {
         applicationId = "com.nictra"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        // IMPORTANTE: Para actualizaciones, versionCode debe ser mayor que el anterior
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
 
-        buildConfigField("String", "BASE_URL", "\"https://finals-advisor-sunrise-mentor.trycloudflare.com\"")
+        buildConfigField("String", "BASE_URL", "\"https://deathshot-pc.tailcf22a1.ts.net/\"")
     }
 
     buildTypes {
@@ -30,10 +31,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "BASE_URL", "\"https://finals-advisor-sunrise-mentor.trycloudflare.com\"")
+            buildConfigField("String", "BASE_URL", "\"https://deathshot-pc.tailcf22a1.ts.net/\"")
         }
         debug {
-            buildConfigField("String", "BASE_URL", "\"https://finals-advisor-sunrise-mentor.trycloudflare.com\"")
+            buildConfigField("String", "BASE_URL", "\"https://deathshot-pc.tailcf22a1.ts.net/\"")
         }
     }
     compileOptions {
@@ -54,7 +55,6 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
-            // Necesario para evitar conflictos con GraphHopper y procesar rutas offline
             pickFirsts += "META-INF/INDEX.LIST"
             pickFirsts += "META-INF/DEPENDENCIES"
             pickFirsts += "META-INF/LICENSE"
@@ -89,27 +89,19 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     
-    // Maps (OpenStreetMap 100% Offline)
     implementation(libs.osmdroid.android)
-    
-    // Motor de Rutas Offline (GraphHopper)
     implementation(libs.graphhopper.core)
     implementation(libs.slf4j.android)
     
-    // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
-    // Retrofit & Networking
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.gson)
 
-    // DataStore
     implementation(libs.androidx.datastore.preferences)
-
-    // Desugaring
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     testImplementation(libs.junit)
