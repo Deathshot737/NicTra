@@ -1,5 +1,6 @@
 package com.nictra.ui.home
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -35,6 +36,8 @@ fun HomeScreen(
     searchResults: List<TramiteEntity>,
     searchQuery: String,
     lastSyncDate: String?,
+    isSyncing: Boolean,
+    syncFailed: Boolean,
     onSearchQueryChange: (String) -> Unit,
     completedCount: Int,
     onCategoryClick: (CategoriaEntity) -> Unit,
@@ -88,9 +91,8 @@ fun HomeScreen(
                 HeaderSection(searchQuery, onSearchQueryChange)
             }
 
-            // Barra de estado de sincronización
             item {
-                SyncStatusBanner(lastSyncDate, onSyncClick)
+                SyncStatusBanner(lastSyncDate, isSyncing, syncFailed, onSyncClick)
             }
 
             if (searchQuery.isNotEmpty()) {
@@ -145,7 +147,12 @@ fun HomeScreen(
 }
 
 @Composable
-fun SyncStatusBanner(lastSyncDate: String?, onSyncClick: () -> Unit) {
+fun SyncStatusBanner(
+    lastSyncDate: String?, 
+    isSyncing: Boolean, 
+    syncFailed: Boolean, 
+    onSyncClick: () -> Unit
+) {
     val formattedDate = remember(lastSyncDate) {
         if (lastSyncDate != null) {
             try {
@@ -159,9 +166,12 @@ fun SyncStatusBanner(lastSyncDate: String?, onSyncClick: () -> Unit) {
         }
     }
 
+    val bannerColor = if (syncFailed) Color(0xFFFFF3F3) else Color.White
+    val textColor = if (syncFailed) Color(0xFFD32F2F) else Color.DarkGray
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = Color.White,
+        color = bannerColor,
         shadowElevation = 1.dp
     ) {
         Row(
@@ -173,24 +183,34 @@ fun SyncStatusBanner(lastSyncDate: String?, onSyncClick: () -> Unit) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Contenido actualizado el:",
+                    text = if (syncFailed) "Sin conexión - Usando datos locales" else "Contenido actualizado el:",
                     fontSize = 11.sp,
-                    color = Color.Gray
+                    color = if (syncFailed) Color(0xFFD32F2F) else Color.Gray,
+                    fontWeight = if (syncFailed) FontWeight.Bold else FontWeight.Normal
                 )
                 Text(
-                    text = formattedDate,
+                    text = if (isSyncing) "Sincronizando..." else formattedDate,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color.DarkGray
+                    color = textColor
                 )
             }
-            IconButton(onClick = onSyncClick) {
-                Icon(
-                    Icons.Default.Refresh, 
-                    contentDescription = "Sincronizar ahora",
-                    tint = Color(0xFF1A3B70),
-                    modifier = Modifier.size(20.dp)
+            
+            if (isSyncing) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    color = Color(0xFF1A3B70)
                 )
+            } else {
+                IconButton(onClick = onSyncClick) {
+                    Icon(
+                        Icons.Default.Refresh, 
+                        contentDescription = "Sincronizar ahora",
+                        tint = Color(0xFF1A3B70),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }
@@ -214,7 +234,7 @@ fun HeaderSection(searchQuery: String, onSearchQueryChange: (String) -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Modo offline activo",
+                    text = "Base de datos local activa",
                     color = Color(0xFF4CAF50),
                     fontSize = 12.sp
                 )
