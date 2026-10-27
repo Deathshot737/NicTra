@@ -30,6 +30,7 @@ import com.nictra.data.local.entities.DelegacionEntity
 import com.nictra.data.local.entities.PasoEntity
 import com.nictra.data.local.entities.RequisitoEntity
 import com.nictra.data.local.entities.TramiteEntity
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,6 +47,9 @@ fun TramiteDetailScreen(
     onDelegationClick: (String) -> Unit,
     onSaveClick: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    
     val checkedCount = requisitos.count { it.isChecked }
     val totalReq = requisitos.size
     val progress = if (totalReq > 0) checkedCount.toFloat() / totalReq else 0f
@@ -110,6 +114,7 @@ fun TramiteDetailScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { },
@@ -137,7 +142,12 @@ fun TramiteDetailScreen(
                 Column(modifier = Modifier.padding(16.dp)) {
                     if (!isTracking) {
                         Button(
-                            onClick = onStartTracking,
+                            onClick = {
+                                onStartTracking()
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("Trámite añadido a tu lista de seguimiento")
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth().height(56.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(

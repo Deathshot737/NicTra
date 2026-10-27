@@ -18,56 +18,52 @@ class SyncRepository(
     private val syncPreferences: SyncPreferences
 ) {
     private val syncMutex = Mutex()
-    private val FORCED_SYNC_INTERVAL = 24 * 60 * 60 * 1000L // 24 horas en milisegundos
 
     suspend fun syncFeed(force: Boolean = false): Result<Unit> = withContext(Dispatchers.IO) {
         syncMutex.withLock {
             try {
-                // 1. Obtener versión remota
-                val remoteVersionInfo = apiService.getFeedVersion()
-                val localVersion = syncPreferences.feedVersion.first()
-                val lastFullSyncTime = syncPreferences.lastFullSyncTime.first()
+                Log.d("SyncRepo", ">>> Iniciando verificación de versión en la API...")
                 
-                val isStale = System.currentTimeMillis() - lastFullSyncTime > FORCED_SYNC_INTERVAL
-                val shouldForce = force || isStale
+                // 1. Preguntar SIEMPRE primero la versión a la API
+                val remoteInfo = apiService.getFeedVersion()
+                val localVersion = syncPreferences.feedVersion.first()
+                
+                Log.d("SyncRepo", "Versión remota: ${remoteInfo.version} | Versión local: ${localVersion ?: "Ninguna"}")
 
-                // 2. Decidir si descargar
-                if (!shouldForce && remoteVersionInfo.version == localVersion) {
-                    Log.i("SyncRepo", "Feed ya está actualizado (versión: $localVersion)")
+                // 2. Decisión: ¿Es necesario descargar el feed completo?
+                if (!force && localVersion != null && remoteInfo.version == localVersion) {
+                    Log.i("SyncRepo", "El feed ya está actualizado (v${remoteInfo.version}). Omitiendo descarga.")
                     return@withContext Result.success(Unit)
                 }
 
-                // 3. Descargar snapshot completo
-                Log.i("SyncRepo", "Descargando nuevo feed snapshot (Force: $shouldForce)...")
+                // 3. Descarga solo si la versión cambió o si es forzado
+                Log.i("SyncRepo", "Descargando feed completo desde la API (Motivo: Versión nueva o Force)...")
                 val snapshot = apiService.getFeed()
 
-                // 4. Aplicar snapshot preservando estado local
+                // 4. Procesar y guardar en base de datos
                 applySnapshot(snapshot)
 
-                // 5. Guardar nueva versión e info de sync
+                // 5. Actualizar versión local SOLO si todo lo anterior tuvo éxito
                 syncPreferences.saveSyncInfo(
-                    version = remoteVersionInfo.version, 
-                    fecha = remoteVersionInfo.actualizadoEn,
+                    version = remoteInfo.version, 
+                    fecha = remoteInfo.actualizadoEn,
                     fullSync = true
                 )
                 
-                Log.i("SyncRepo", "Sincronización exitosa: ${remoteVersionInfo.version}")
+                Log.i("SyncRepo", "Sincronización v${remoteInfo.version} completada con éxito.")
                 Result.success(Unit)
             } catch (e: Exception) {
-                Log.e("SyncRepo", "Error durante la sincronización", e)
+                Log.e("SyncRepo", "Error en sincronización: ${e.message}", e)
                 Result.failure(e)
             }
         }
     }
 
     private suspend fun applySnapshot(dto: FeedDto) {
-        // Validación: los 6 arrays deben estar presentes
-        if (dto.categorias == null || dto.tramites == null || dto.requisitos == null || 
-            dto.pasos == null || dto.delegaciones == null || dto.delegacionTramites == null) {
-             throw IllegalArgumentException("Snapshot incompleto: faltan colecciones requeridas")
+        if (dto.categorias == null || dto.tramites == null) {
+             throw IllegalArgumentException("Snapshot de API inválido: faltan campos obligatorios")
         }
 
-        // Obtener datos actuales para preservar el estado del usuario
         val existingTramites = tramiteDao.getAllTramitesList().associateBy { it.id }
         val existingRequisitos = tramiteDao.getAllRequisitosList().associateBy { it.id }
 
@@ -84,65 +80,36 @@ class SyncRepository(
                 costo = dtoItem.costo,
                 tiempoEstimado = dtoItem.tiempoEstimado,
                 icono = dtoItem.icono,
-                lastVisited = existing?.lastVisited, // Preservar
+                lastVisited = existing?.lastVisited,
                 isQuickAccess = dtoItem.isQuickAccess ?: false,
-                isCompleted = existing?.isCompleted ?: false // Preservar
+                isCompleted = existing?.isCompleted ?: false
             )
         }
 
-        val requisitos = dto.requisitos.map { dtoItem ->
+        val requisitos = (dto.requisitos ?: emptyList()).map { dtoItem ->
             val existing = existingRequisitos[dtoItem.id]
             RequisitoEntity(
                 id = dtoItem.id,
                 tramiteId = dtoItem.tramiteId,
                 descripcion = dtoItem.descripcion,
                 esTramitePrevio = dtoItem.esTramitePrevio,
-                isChecked = existing?.isChecked ?: false, // Preservar
+                isChecked = existing?.isChecked ?: false,
                 nota = dtoItem.nota
             )
         }
 
-        val pasos = dto.pasos.map { 
-            PasoEntity(
-                id = it.id,
-                tramiteId = it.tramiteId,
-                orden = it.orden,
-                descripcion = it.descripcion
-            )
+        val pasos = (dto.pasos ?: emptyList()).map { 
+            PasoEntity(it.id, it.tramiteId, it.orden, it.descripcion)
         }
 
-        val delegaciones = dto.delegaciones.map { 
-            DelegacionEntity(
-                id = it.id,
-                nombreOficina = it.nombreOficina,
-                departamento = it.departamento,
-                latitud = it.latitud,
-                longitud = it.longitud,
-                direccion = it.direccion
-            )
+        val delegaciones = (dto.delegaciones ?: emptyList()).map { 
+            DelegacionEntity(it.id, it.nombreOficina, it.departamento, it.latitud, it.longitud, it.direccion)
         }
 
-        val crossRefs = dto.delegacionTramites.map { 
+        val crossRefs = (dto.delegacionTramites ?: emptyList()).map { 
             DelegacionTramiteCrossRef(it.delegacionId, it.tramiteId)
         }
 
-        // Validación de integridad referencial
-        val categoriaIds = categorias.map { it.id }.toSet()
-        val tramiteIds = tramites.map { it.id }.toSet()
-        val delegacionIds = delegaciones.map { it.id }.toSet()
-
-        val validTramites = tramites.filter { it.categoriaId in categoriaIds }
-        val validRequisitos = requisitos.filter { it.tramiteId in tramiteIds }
-        val validPasos = pasos.filter { it.tramiteId in tramiteIds }
-        val validCrossRefs = crossRefs.filter { it.tramiteId in tramiteIds && it.delegacionId in delegacionIds }
-
-        tramiteDao.applySnapshot(
-            categorias,
-            validTramites,
-            validRequisitos,
-            validPasos,
-            delegaciones,
-            validCrossRefs
-        )
+        tramiteDao.applySnapshot(categorias, tramites, requisitos, pasos, delegaciones, crossRefs)
     }
 }

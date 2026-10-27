@@ -4,6 +4,7 @@ import com.nictra.data.local.SyncPreferences
 import com.nictra.data.local.dao.TramiteDao
 import com.nictra.data.local.entities.*
 import kotlinx.coroutines.flow.Flow
+import java.text.Normalizer
 
 class TramiteRepository(
     private val tramiteDao: TramiteDao,
@@ -16,11 +17,16 @@ class TramiteRepository(
     fun getTramitesByCategoria(categoriaId: String): Flow<List<TramiteEntity>> = 
         tramiteDao.getTramitesByCategoria(categoriaId)
 
-    fun searchTramites(query: String): Flow<List<TramiteEntity>> = 
-        tramiteDao.searchTramites(query)
+    fun searchTramites(query: String): Flow<List<TramiteEntity>> {
+        val normalizedQuery = query.normalizeForSearch()
+        return tramiteDao.searchTramites(normalizedQuery)
+    }
 
     suspend fun getTramiteById(tramiteId: String): TramiteEntity? = 
         tramiteDao.getTramiteById(tramiteId)
+
+    fun getTramiteByIdFlow(tramiteId: String): Flow<TramiteEntity?> =
+        tramiteDao.getTramiteByIdFlow(tramiteId)
 
     fun getRequisitosByTramite(tramiteId: String): Flow<List<RequisitoEntity>> = 
         tramiteDao.getRequisitosByTramite(tramiteId)
@@ -57,5 +63,10 @@ class TramiteRepository(
 
     suspend fun resetTramite(tramiteId: String) {
         tramiteDao.resetTramite(tramiteId)
+    }
+
+    private fun String.normalizeForSearch(): String {
+        val temp = Normalizer.normalize(this, Normalizer.Form.NFD)
+        return Regex("\\p{InCombiningDiacriticalMarks}+").replace(temp, "").lowercase()
     }
 }

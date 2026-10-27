@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nictra.data.local.entities.CategoriaEntity
@@ -117,10 +118,16 @@ fun HomeScreen(
                     SectionTitle("¿Qué necesitas hacer hoy?")
                     CategoriesGrid(categorias, onCategoryClick)
                 }
-                item {
-                    SectionTitle("Accesos rápidos")
-                    QuickAccessList(quickAccess, onTramiteClick)
+                
+                if (quickAccess.isNotEmpty()) {
+                    item {
+                        SectionTitle("Accesos rápidos")
+                    }
+                    items(quickAccess) { tramite ->
+                        RecentTramiteCard(tramite, onTramiteClick)
+                    }
                 }
+                
                 item {
                     SectionTitle("Trámites recientes")
                 }
@@ -310,69 +317,71 @@ fun SectionTitle(title: String) {
 
 @Composable
 fun CategoriesGrid(categorias: List<CategoriaEntity>, onCategoryClick: (CategoriaEntity) -> Unit) {
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    val columns = 4
+    val rows = categorias.chunked(columns)
+
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(categorias) { categoria ->
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .width(80.dp)
-                    .clickable { onCategoryClick(categoria) }
+        rows.forEach { rowItems ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    color = Color.White,
-                    shadowElevation = 2.dp,
-                    modifier = Modifier.size(60.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(categoria.icono, fontSize = 24.sp)
+                rowItems.forEach { categoria ->
+                    CategoryItem(
+                        categoria = categoria,
+                        modifier = Modifier.weight(1f),
+                        onCategoryClick = onCategoryClick
+                    )
+                }
+                
+                // Rellenar espacios vacíos si la fila no está completa
+                if (rowItems.size < columns) {
+                    repeat(columns - rowItems.size) {
+                        Spacer(modifier = Modifier.weight(1f))
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = categoria.nombre,
-                    fontSize = 12.sp,
-                    maxLines = 1,
-                    color = Color.DarkGray
-                )
             }
         }
     }
 }
 
 @Composable
-fun QuickAccessList(tramites: List<TramiteEntity>, onTramiteClick: (String) -> Unit) {
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+fun CategoryItem(
+    categoria: CategoriaEntity,
+    modifier: Modifier = Modifier,
+    onCategoryClick: (CategoriaEntity) -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .clickable { onCategoryClick(categoria) }
     ) {
-        items(tramites) { tramite ->
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = Color.White,
-                shadowElevation = 1.dp,
-                modifier = Modifier
-                    .width(180.dp)
-                    .clickable { onTramiteClick(tramite.id) }
-            ) {
-                Row(
-                    modifier = Modifier.padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(tramite.icono, fontSize = 20.sp)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = tramite.titulo,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        maxLines = 1
-                    )
-                }
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = Color.White,
+            shadowElevation = 2.dp,
+            modifier = Modifier.size(64.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Text(categoria.icono, fontSize = 28.sp)
             }
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = categoria.nombre,
+            fontSize = 11.sp,
+            maxLines = 2,
+            lineHeight = 14.sp,
+            textAlign = TextAlign.Center,
+            color = Color.DarkGray,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

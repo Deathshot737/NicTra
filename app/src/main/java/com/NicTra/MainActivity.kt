@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -127,9 +128,10 @@ class MainActivity : ComponentActivity() {
                         selectedTramiteId != null -> {
                             BackHandler { selectedTramiteId = null }
                             val id = selectedTramiteId!!
-                            val tramite by produceState<TramiteEntity?>(initialValue = null, id) {
-                                value = repository.getTramiteById(id)
-                            }
+                            
+                            // Cambiado produceState por collectAsState para observar cambios en tiempo real
+                            val tramite by repository.getTramiteByIdFlow(id).collectAsState(initial = null)
+
                             val requisitos by repository.getRequisitosByTramite(id).collectAsState(initial = emptyList())
                             val pasos by repository.getPasosByTramite(id).collectAsState(initial = emptyList())
                             val delegaciones by repository.getDelegacionesByTramite(id).collectAsState(initial = emptyList())
