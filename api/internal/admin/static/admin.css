@@ -85,6 +85,8 @@ h1 { font-size: 1.4rem; margin: 10px 0 4px; }
 .panel .grid tbody tr:last-child td:last-child { border-bottom-right-radius: 8px; }
 .panel .muted { display: block; margin: 2px 0; }
 .stack.panel { max-width: 620px; padding: 18px 20px; }
+.map-section { display: flex; flex-direction: column; gap: 6px; }
+.map-section label { display: flex; flex-direction: column; gap: 4px; }
 .table-wrap { overflow-x: auto; }
 
 .grid {
