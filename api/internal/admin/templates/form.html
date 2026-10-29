@@ -32,6 +32,46 @@
     {{if $f.Help}}<small class="muted">{{$f.Help}}</small>{{end}}
   </label>
   {{end}}
+
+  {{if eq .Entity.Slug "delegaciones"}}
+  <div class="map-section">
+    <label>
+      <span>Ubicación en el mapa</span>
+      <small class="muted">Haz clic en el mapa para seleccionar la posición. Se actualizarán latitud y longitud automáticamente.</small>
+    </label>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <div id="map-picker" style="height: 320px; width: 100%; border-radius: 8px; border: 1px solid var(--line); margin-top: 8px;"></div>
+    <script>
+      (function() {
+        var latInput = document.querySelector('input[name="latitud"]');
+        var lngInput = document.querySelector('input[name="longitud"]');
+        var defaultLat = latInput && latInput.value ? parseFloat(latInput.value) : 12.1364;
+        var defaultLng = lngInput && lngInput.value ? parseFloat(lngInput.value) : -86.2514;
+        if (isNaN(defaultLat)) defaultLat = 12.1364;
+        if (isNaN(defaultLng)) defaultLng = -86.2514;
+        var map = L.map('map-picker').setView([defaultLat, defaultLng], latInput && latInput.value ? 16 : 7);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        var marker = L.marker([defaultLat, defaultLng], {draggable: true}).addTo(map);
+        function updateInputs(latlng) {
+          if (latInput) latInput.value = latlng.lat.toFixed(6);
+          if (lngInput) lngInput.value = latlng.lng.toFixed(6);
+        }
+        map.on('click', function(e) {
+          marker.setLatLng(e.latlng);
+          updateInputs(e.latlng);
+        });
+        marker.on('dragend', function(e) {
+          updateInputs(marker.getLatLng());
+        });
+        setTimeout(function() { map.invalidateSize(); }, 100);
+      })();
+    </script>
+  </div>
+  {{end}}
+
   <div class="form-actions">
     <button type="submit">Guardar</button>
     <a href="/admin/{{.Entity.Slug}}" class="lnk">Cancelar</a>

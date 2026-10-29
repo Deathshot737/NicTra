@@ -1,1 +1,4 @@
 .env
+.opencode/
+opencode.json
+.vscode/

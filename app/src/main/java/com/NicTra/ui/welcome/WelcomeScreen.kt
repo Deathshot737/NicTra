@@ -105,7 +105,7 @@ fun WelcomeScreen(onNavigateToHome: () -> Unit) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     WelcomeInfoItem(
@@ -140,22 +140,17 @@ fun WelcomeScreen(onNavigateToHome: () -> Unit) {
                             Text(
                                 text = "Ir al panel de trámites",
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Icon(Icons.Default.ChevronRight, contentDescription = null)
+                            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.White)
                         }
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
-//            Text(
-//                text = "Sin cuenta ni contraseña requerida",
-//                color = Color.White.copy(alpha = 0.6f),
-//                fontSize = 12.sp
-//            )
         }
     }
 }
@@ -166,7 +161,7 @@ fun WelcomeInfoItem(icon: ImageVector, title: String, description: String) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = Color(0xFF1B427A),
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(24.dp)
         )
         Spacer(modifier = Modifier.width(16.dp))
@@ -175,12 +170,12 @@ fun WelcomeInfoItem(icon: ImageVector, title: String, description: String) {
                 text = title,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = description,
                 fontSize = 12.sp,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

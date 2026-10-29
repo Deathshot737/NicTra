@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,7 +27,8 @@ fun MyTramitesScreen(
     onTramiteClick: (String) -> Unit,
     onHomeClick: () -> Unit,
     onMapClick: () -> Unit,
-    completedCount: Int
+    completedCount: Int,
+    onMenuClick: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Todos", "Pendientes", "En proceso", "Completos")
@@ -43,15 +45,24 @@ fun MyTramitesScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF1A3B70))
+                    .background(MaterialTheme.colorScheme.primary)
                     .padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
-                Text(
-                    "Mis Trámites",
-                    color = Color.White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Mis Trámites",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    IconButton(onClick = onMenuClick) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menú", tint = MaterialTheme.colorScheme.onPrimary)
+                    }
+                }
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -77,34 +88,41 @@ fun MyTramitesScreen(
         },
         bottomBar = {
             NavigationBar(
-                containerColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.surface,
                 tonalElevation = 8.dp
             ) {
+                val navBarColors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                )
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
                     label = { Text("Inicio") },
                     selected = false,
-                    onClick = onHomeClick
+                    onClick = onHomeClick,
+                    colors = navBarColors
                 )
                 NavigationBarItem(
                     icon = { 
                         if (completedCount > 0) {
                             BadgedBox(badge = { Badge { Text(completedCount.toString()) } }) {
-                                Icon(Icons.Default.List, contentDescription = "Mis Trámites")
+                                Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Mis Trámites")
                             }
                         } else {
-                            Icon(Icons.Default.List, contentDescription = "Mis Trámites")
+                            Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Mis Trámites")
                         }
                     },
                     label = { Text("Mis Trámites") },
                     selected = true,
-                    onClick = { }
+                    onClick = { },
+                    colors = navBarColors
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Place, contentDescription = "Mapa") },
                     label = { Text("Mapa") },
                     selected = false,
-                    onClick = onMapClick
+                    onClick = onMapClick,
+                    colors = navBarColors
                 )
             }
         }
@@ -113,12 +131,12 @@ fun MyTramitesScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(Color(0xFFF5F7FA))
+                .background(MaterialTheme.colorScheme.background)
         ) {
             ScrollableTabRow(
                 selectedTabIndex = selectedTab,
                 containerColor = Color.Transparent,
-                contentColor = Color(0xFF1A3B70),
+                contentColor = MaterialTheme.colorScheme.primary,
                 edgePadding = 16.dp,
                 divider = {},
                 indicator = {}
@@ -131,12 +149,12 @@ fun MyTramitesScreen(
                         modifier = Modifier
                             .padding(vertical = 12.dp, horizontal = 4.dp)
                             .clip(RoundedCornerShape(20.dp))
-                            .background(if (isSelected) Color(0xFF1A3B70) else Color.White)
+                            .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface)
                             .padding(horizontal = 16.dp, vertical = 6.dp),
                         text = {
                             Text(
                                 title,
-                                color = if (isSelected) Color.White else Color.Gray,
+                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 12.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                             )
@@ -147,7 +165,7 @@ fun MyTramitesScreen(
 
             if (filteredTramites.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No hay trámites en esta sección", color = Color.Gray)
+                    Text("No hay trámites en esta sección", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             } else {
                 LazyColumn(
@@ -173,7 +191,7 @@ fun SummaryCard(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        color = Color.White.copy(alpha = 0.15f)
+        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f)
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
@@ -183,12 +201,12 @@ fun SummaryCard(
                 text = count.toString(),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onPrimary
             )
             Text(
                 text = label,
                 fontSize = 11.sp,
-                color = Color.White.copy(alpha = 0.8f)
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
             )
         }
     }
@@ -203,16 +221,16 @@ fun MyTramiteCard(item: TramiteProgress, onClick: (String) -> Unit) {
         else -> "Pendiente"
     }
     val statusColor = when {
-        isCompleted -> Color(0xFF2E7D32)
-        item.checkedRequisitos > 0 -> Color(0xFF1976D2)
-        else -> Color(0xFFFBC02D)
+        isCompleted -> Color(0xFF4CAF50)
+        item.checkedRequisitos > 0 -> MaterialTheme.colorScheme.primary
+        else -> Color(0xFFFFC107)
     }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick(item.tramite.id) },
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
@@ -223,7 +241,7 @@ fun MyTramiteCard(item: TramiteProgress, onClick: (String) -> Unit) {
             Surface(
                 modifier = Modifier.size(48.dp),
                 shape = RoundedCornerShape(12.dp),
-                color = Color(0xFFF5F7FA)
+                color = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(item.tramite.icono, fontSize = 24.sp)
@@ -240,18 +258,13 @@ fun MyTramiteCard(item: TramiteProgress, onClick: (String) -> Unit) {
                         item.tramite.titulo,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp,
-                        color = Color(0xFF1A3B70)
-                    )
-                    Text(
-                        text = "Hoy 08:32",
-                        fontSize = 10.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
                 Text(
                     item.tramite.entidad,
                     fontSize = 12.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
@@ -276,14 +289,14 @@ fun MyTramiteCard(item: TramiteProgress, onClick: (String) -> Unit) {
                         val missing = item.totalRequisitos - item.checkedRequisitos
                         Text(
                             text = if (missing == 0) "¡Documentos listos!" else "$missing faltan",
-                            color = if (missing == 0) Color(0xFF2E7D32) else Color(0xFFD32F2F),
+                            color = if (missing == 0) Color(0xFF4CAF50) else MaterialTheme.colorScheme.error,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium
                         )
                     } else {
                         Text(
                             "¡Finalizado!",
-                            color = Color(0xFF2E7D32),
+                            color = Color(0xFF4CAF50),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium
                         )

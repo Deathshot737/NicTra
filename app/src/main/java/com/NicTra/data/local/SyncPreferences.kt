@@ -15,6 +15,7 @@ class SyncPreferences(private val context: Context) {
         private val FEED_VERSION = stringPreferencesKey("feed_version")
         private val ULTIMA_ACTUALIZACION = stringPreferencesKey("ultima_actualizacion")
         private val LAST_FULL_SYNC_TIME = longPreferencesKey("last_full_sync_time")
+        private val DARK_MODE = booleanPreferencesKey("dark_mode")
     }
 
     val feedVersion: Flow<String?> = context.dataStore.data
@@ -32,6 +33,11 @@ class SyncPreferences(private val context: Context) {
             preferences[LAST_FULL_SYNC_TIME] ?: 0L
         }
 
+    val darkMode: Flow<Boolean?> = context.dataStore.data
+        .map { preferences ->
+            preferences[DARK_MODE]
+        }
+
     suspend fun saveSyncInfo(version: String, fecha: String, fullSync: Boolean = false) {
         context.dataStore.edit { preferences ->
             preferences[FEED_VERSION] = version
@@ -39,6 +45,12 @@ class SyncPreferences(private val context: Context) {
             if (fullSync) {
                 preferences[LAST_FULL_SYNC_TIME] = System.currentTimeMillis()
             }
+        }
+    }
+
+    suspend fun setDarkMode(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[DARK_MODE] = enabled
         }
     }
 }

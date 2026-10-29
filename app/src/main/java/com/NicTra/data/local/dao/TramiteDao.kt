@@ -87,14 +87,18 @@ interface TramiteDao {
 
     @Query("""
         SELECT * FROM tramites 
-        WHERE titulo LIKE '%' || :query || '%' 
-        OR entidad LIKE '%' || :query || '%' 
-        OR descripcion LIKE '%' || :query || '%'
+        WHERE 
+            LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(titulo, 'á', 'a'), 'é', 'e'), 'í', 'i'), 'ó', 'o'), 'ú', 'u')) LIKE '%' || :query || '%' 
+            OR LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(entidad, 'á', 'a'), 'é', 'e'), 'í', 'i'), 'ó', 'o'), 'ú', 'u')) LIKE '%' || :query || '%' 
+            OR LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(descripcion, 'á', 'a'), 'é', 'e'), 'í', 'i'), 'ó', 'o'), 'ú', 'u')) LIKE '%' || :query || '%'
     """)
     fun searchTramites(query: String): Flow<List<TramiteEntity>>
 
     @Query("SELECT * FROM tramites WHERE id = :tramiteId")
     suspend fun getTramiteById(tramiteId: String): TramiteEntity?
+
+    @Query("SELECT * FROM tramites WHERE id = :tramiteId")
+    fun getTramiteByIdFlow(tramiteId: String): Flow<TramiteEntity?>
 
     @Query("SELECT * FROM requisitos WHERE tramiteId = :tramiteId")
     fun getRequisitosByTramite(tramiteId: String): Flow<List<RequisitoEntity>>

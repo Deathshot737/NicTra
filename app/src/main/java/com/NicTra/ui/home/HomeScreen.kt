@@ -5,27 +5,24 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nictra.data.local.entities.CategoriaEntity
 import com.nictra.data.local.entities.TramiteEntity
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,28 +32,32 @@ fun HomeScreen(
     recentTramites: List<TramiteEntity>,
     searchResults: List<TramiteEntity>,
     searchQuery: String,
-    lastSyncDate: String?,
     isSyncing: Boolean,
-    syncFailed: Boolean,
     onSearchQueryChange: (String) -> Unit,
     completedCount: Int,
     onCategoryClick: (CategoriaEntity) -> Unit,
     onTramiteClick: (String) -> Unit,
     onMyTramitesClick: () -> Unit,
     onMapClick: () -> Unit,
-    onSyncClick: () -> Unit
+    onRefresh: () -> Unit,
+    onMenuClick: () -> Unit
 ) {
     Scaffold(
         bottomBar = {
             NavigationBar(
-                containerColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.surface,
                 tonalElevation = 8.dp
             ) {
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
                     label = { Text("Inicio") },
                     selected = true,
-                    onClick = { }
+                    onClick = { },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                    )
                 )
                 NavigationBarItem(
                     icon = { 
@@ -70,146 +71,95 @@ fun HomeScreen(
                     },
                     label = { Text("Mis Trámites") },
                     selected = false,
-                    onClick = onMyTramitesClick
+                    onClick = onMyTramitesClick,
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                    )
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Place, contentDescription = "Mapa") },
                     label = { Text("Mapa") },
                     selected = false,
-                    onClick = onMapClick
+                    onClick = onMapClick,
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                    )
                 )
             }
         }
     ) { padding ->
-        LazyColumn(
+        PullToRefreshBox(
+            isRefreshing = isSyncing,
+            onRefresh = onRefresh,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(Color(0xFFF5F7FA))
         ) {
-            item {
-                HeaderSection(searchQuery, onSearchQueryChange)
-            }
-
-            item {
-                SyncStatusBanner(lastSyncDate, isSyncing, syncFailed, onSyncClick)
-            }
-
-            if (searchQuery.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+            ) {
                 item {
-                    SectionTitle("Resultados para \"$searchQuery\"")
+                    HeaderSection(searchQuery, onSearchQueryChange, onMenuClick)
                 }
-                if (searchResults.isEmpty()) {
+
+                if (searchQuery.isNotEmpty()) {
                     item {
-                        Text(
-                            "No se encontraron trámites con ese nombre.",
-                            modifier = Modifier.padding(16.dp),
-                            color = Color.Gray
-                        )
+                        SectionTitle("Resultados para \"$searchQuery\"")
+                    }
+                    if (searchResults.isEmpty()) {
+                        item {
+                            Text(
+                                "No se encontraron trámites con ese nombre.",
+                                modifier = Modifier.padding(16.dp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else {
+                        items(searchResults) { tramite ->
+                            RecentTramiteCard(tramite, onTramiteClick)
+                        }
                     }
                 } else {
-                    items(searchResults) { tramite ->
-                        RecentTramiteCard(tramite, onTramiteClick)
-                    }
-                }
-            } else {
-                item {
-                    SectionTitle("¿Qué necesitas hacer hoy?")
-                    CategoriesGrid(categorias, onCategoryClick)
-                }
-                item {
-                    SectionTitle("Accesos rápidos")
-                    QuickAccessList(quickAccess, onTramiteClick)
-                }
-                item {
-                    SectionTitle("Trámites recientes")
-                }
-                if (recentTramites.isEmpty()) {
                     item {
-                        Text(
-                            "No hay trámites recientes",
-                            modifier = Modifier.padding(16.dp),
-                            color = Color.Gray,
-                            fontSize = 14.sp
-                        )
+                        SectionTitle("¿Qué necesitas hacer hoy?")
+                        CategoriesGrid(categorias, onCategoryClick)
                     }
-                } else {
-                    items(recentTramites) { tramite ->
-                        RecentTramiteCard(tramite, onTramiteClick)
+                    
+                    if (quickAccess.isNotEmpty()) {
+                        item {
+                            SectionTitle("Accesos rápidos")
+                        }
+                        items(quickAccess) { tramite ->
+                            RecentTramiteCard(tramite, onTramiteClick)
+                        }
+                    }
+                    
+                    item {
+                        SectionTitle("Trámites recientes")
+                    }
+                    if (recentTramites.isEmpty()) {
+                        item {
+                            Text(
+                                "No hay trámites recientes",
+                                modifier = Modifier.padding(16.dp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 14.sp
+                            )
+                        }
+                    } else {
+                        items(recentTramites) { tramite ->
+                            RecentTramiteCard(tramite, onTramiteClick)
+                        }
                     }
                 }
-            }
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
-    }
-}
-
-@Composable
-fun SyncStatusBanner(
-    lastSyncDate: String?, 
-    isSyncing: Boolean, 
-    syncFailed: Boolean, 
-    onSyncClick: () -> Unit
-) {
-    val formattedDate = remember(lastSyncDate) {
-        if (lastSyncDate != null) {
-            try {
-                val zdt = ZonedDateTime.parse(lastSyncDate)
-                zdt.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault()))
-            } catch (e: Exception) {
-                lastSyncDate
-            }
-        } else {
-            "Nunca sincronizado"
-        }
-    }
-
-    val bannerColor = if (syncFailed) Color(0xFFFFF3F3) else Color.White
-    val textColor = if (syncFailed) Color(0xFFD32F2F) else Color.DarkGray
-
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = bannerColor,
-        shadowElevation = 1.dp
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = if (syncFailed) "Sin conexión - Usando datos locales" else "Contenido actualizado el:",
-                    fontSize = 11.sp,
-                    color = if (syncFailed) Color(0xFFD32F2F) else Color.Gray,
-                    fontWeight = if (syncFailed) FontWeight.Bold else FontWeight.Normal
-                )
-                Text(
-                    text = if (isSyncing) "Sincronizando..." else formattedDate,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = textColor
-                )
-            }
-            
-            if (isSyncing) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp,
-                    color = Color(0xFF1A3B70)
-                )
-            } else {
-                IconButton(onClick = onSyncClick) {
-                    Icon(
-                        Icons.Default.Refresh, 
-                        contentDescription = "Sincronizar ahora",
-                        tint = Color(0xFF1A3B70),
-                        modifier = Modifier.size(20.dp)
-                    )
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
@@ -217,14 +167,27 @@ fun SyncStatusBanner(
 }
 
 @Composable
-fun HeaderSection(searchQuery: String, onSearchQueryChange: (String) -> Unit) {
+fun HeaderSection(searchQuery: String, onSearchQueryChange: (String) -> Unit, onMenuClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
-            .background(Color(0xFF1A3B70))
+            .background(MaterialTheme.colorScheme.primary)
             .padding(24.dp)
     ) {
+        // Icono de hamburguesa a la derecha
+        IconButton(
+            onClick = onMenuClick,
+            modifier = Modifier.align(Alignment.TopEnd)
+        ) {
+            Icon(
+                Icons.Default.Menu, 
+                contentDescription = "Menú", 
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(28.dp)
+            )
+        }
+
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
@@ -242,13 +205,13 @@ fun HeaderSection(searchQuery: String, onSearchQueryChange: (String) -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Servicios ciudadanos - Nicaragua",
-                color = Color.White.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
                 fontSize = 14.sp
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "¡Bienvenid@!",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -260,24 +223,24 @@ fun HeaderSection(searchQuery: String, onSearchQueryChange: (String) -> Unit) {
                 value = searchQuery,
                 onValueChange = onSearchQueryChange,
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Buscar trámite: Licencia, Pasaporte...", color = Color.Gray) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
+                placeholder = { Text("Buscar trámite: Licencia, Pasaporte...", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)) },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                 trailingIcon = { 
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { onSearchQueryChange("") }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Borrar", tint = Color.Gray)
+                            Icon(Icons.Default.Clear, contentDescription = "Borrar", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     } else {
                         Surface(
                             shape = RoundedCornerShape(8.dp),
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.surface,
                             modifier = Modifier.padding(end = 8.dp).size(36.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     Icons.Default.LocationOn, 
                                     contentDescription = null, 
-                                    tint = Color(0xFF1A3B70),
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -285,12 +248,12 @@ fun HeaderSection(searchQuery: String, onSearchQueryChange: (String) -> Unit) {
                     }
                 },
                 shape = RoundedCornerShape(12.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    disabledContainerColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    disabledContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
                 )
             )
         }
@@ -304,75 +267,77 @@ fun SectionTitle(title: String) {
         fontSize = 18.sp,
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 12.dp),
-        color = Color(0xFF1A3B70)
+        color = MaterialTheme.colorScheme.primary
     )
 }
 
 @Composable
 fun CategoriesGrid(categorias: List<CategoriaEntity>, onCategoryClick: (CategoriaEntity) -> Unit) {
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    val columns = 4
+    val rows = categorias.chunked(columns)
+
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(categorias) { categoria ->
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .width(80.dp)
-                    .clickable { onCategoryClick(categoria) }
+        rows.forEach { rowItems ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    color = Color.White,
-                    shadowElevation = 2.dp,
-                    modifier = Modifier.size(60.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(categoria.icono, fontSize = 24.sp)
+                rowItems.forEach { categoria ->
+                    CategoryItem(
+                        categoria = categoria,
+                        modifier = Modifier.weight(1f),
+                        onCategoryClick = onCategoryClick
+                    )
+                }
+                
+                // Rellenar espacios vacíos si la fila no está completa
+                if (rowItems.size < columns) {
+                    repeat(columns - rowItems.size) {
+                        Spacer(modifier = Modifier.weight(1f))
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = categoria.nombre,
-                    fontSize = 12.sp,
-                    maxLines = 1,
-                    color = Color.DarkGray
-                )
             }
         }
     }
 }
 
 @Composable
-fun QuickAccessList(tramites: List<TramiteEntity>, onTramiteClick: (String) -> Unit) {
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+fun CategoryItem(
+    categoria: CategoriaEntity,
+    modifier: Modifier = Modifier,
+    onCategoryClick: (CategoriaEntity) -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .clickable { onCategoryClick(categoria) }
     ) {
-        items(tramites) { tramite ->
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = Color.White,
-                shadowElevation = 1.dp,
-                modifier = Modifier
-                    .width(180.dp)
-                    .clickable { onTramiteClick(tramite.id) }
-            ) {
-                Row(
-                    modifier = Modifier.padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(tramite.icono, fontSize = 20.sp)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = tramite.titulo,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        maxLines = 1
-                    )
-                }
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface,
+            shadowElevation = 2.dp,
+            modifier = Modifier.size(64.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Text(categoria.icono, fontSize = 28.sp)
             }
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = categoria.nombre,
+            fontSize = 11.sp,
+            maxLines = 2,
+            lineHeight = 14.sp,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
@@ -383,7 +348,7 @@ fun RecentTramiteCard(tramite: TramiteEntity, onTramiteClick: (String) -> Unit) 
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
             .clickable { onTramiteClick(tramite.id) },
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
@@ -394,7 +359,7 @@ fun RecentTramiteCard(tramite: TramiteEntity, onTramiteClick: (String) -> Unit) 
             Box(
                 modifier = Modifier
                     .size(48.dp)
-                    .background(Color(0xFFF5F7FA), RoundedCornerShape(12.dp)),
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(tramite.icono, fontSize = 24.sp)
@@ -407,12 +372,12 @@ fun RecentTramiteCard(tramite: TramiteEntity, onTramiteClick: (String) -> Unit) 
                     text = tramite.titulo,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = Color(0xFF1A3B70)
+                    color = MaterialTheme.colorScheme.primary
                 )
                 Text(
                     text = tramite.entidad,
                     fontSize = 12.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -420,9 +385,9 @@ fun RecentTramiteCard(tramite: TramiteEntity, onTramiteClick: (String) -> Unit) 
                         imageVector = Icons.Default.Info, 
                         contentDescription = null, 
                         modifier = Modifier.size(14.dp), 
-                        tint = Color.Gray
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Text(" ${tramite.tiempoEstimado}", fontSize = 12.sp, color = Color.Gray)
+                    Text(" ${tramite.tiempoEstimado}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.width(12.dp))
                     Icon(
                         imageVector = Icons.Default.Star, 
@@ -430,14 +395,14 @@ fun RecentTramiteCard(tramite: TramiteEntity, onTramiteClick: (String) -> Unit) 
                         modifier = Modifier.size(14.dp), 
                         tint = Color(0xFFFBC02D)
                     )
-                    Text(" ${tramite.costo}", fontSize = 12.sp, color = Color.Gray)
+                    Text(" ${tramite.costo}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             
             Icon(
                 imageVector = Icons.Default.ArrowForward,
                 contentDescription = null,
-                tint = Color.LightGray,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                 modifier = Modifier.size(24.dp)
             )
         }

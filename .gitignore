@@ -14,3 +14,5 @@
 .cxx
 local.properties
 /api/.opencode/server.lock.json
+/.idea/markdown.xml
+.idea
