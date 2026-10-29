@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -45,7 +44,8 @@ fun HomeScreen(
     onTramiteClick: (String) -> Unit,
     onMyTramitesClick: () -> Unit,
     onMapClick: () -> Unit,
-    onSyncClick: () -> Unit
+    onSyncClick: () -> Unit,
+    onMenuClick: () -> Unit
 ) {
     Scaffold(
         bottomBar = {
@@ -89,7 +89,7 @@ fun HomeScreen(
                 .background(Color(0xFFF5F7FA))
         ) {
             item {
-                HeaderSection(searchQuery, onSearchQueryChange)
+                HeaderSection(searchQuery, onSearchQueryChange, onMenuClick)
             }
 
             item {
@@ -224,7 +224,7 @@ fun SyncStatusBanner(
 }
 
 @Composable
-fun HeaderSection(searchQuery: String, onSearchQueryChange: (String) -> Unit) {
+fun HeaderSection(searchQuery: String, onSearchQueryChange: (String) -> Unit, onMenuClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -232,6 +232,19 @@ fun HeaderSection(searchQuery: String, onSearchQueryChange: (String) -> Unit) {
             .background(Color(0xFF1A3B70))
             .padding(24.dp)
     ) {
+        // Icono de hamburguesa a la derecha
+        IconButton(
+            onClick = onMenuClick,
+            modifier = Modifier.align(Alignment.TopEnd)
+        ) {
+            Icon(
+                Icons.Default.Menu, 
+                contentDescription = "Menú", 
+                tint = Color.White,
+                modifier = Modifier.size(28.dp)
+            )
+        }
+
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(

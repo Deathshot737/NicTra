@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,7 +27,8 @@ fun MyTramitesScreen(
     onTramiteClick: (String) -> Unit,
     onHomeClick: () -> Unit,
     onMapClick: () -> Unit,
-    completedCount: Int
+    completedCount: Int,
+    onMenuClick: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Todos", "Pendientes", "En proceso", "Completos")
@@ -46,12 +48,21 @@ fun MyTramitesScreen(
                     .background(Color(0xFF1A3B70))
                     .padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
-                Text(
-                    "Mis Trámites",
-                    color = Color.White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Mis Trámites",
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    IconButton(onClick = onMenuClick) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menú", tint = Color.White)
+                    }
+                }
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -80,31 +91,38 @@ fun MyTramitesScreen(
                 containerColor = Color.White,
                 tonalElevation = 8.dp
             ) {
+                val navBarColors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = Color(0xFF1A3B70),
+                    indicatorColor = Color(0xFF1A3B70).copy(alpha = 0.1f)
+                )
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
                     label = { Text("Inicio") },
                     selected = false,
-                    onClick = onHomeClick
+                    onClick = onHomeClick,
+                    colors = navBarColors
                 )
                 NavigationBarItem(
                     icon = { 
                         if (completedCount > 0) {
                             BadgedBox(badge = { Badge { Text(completedCount.toString()) } }) {
-                                Icon(Icons.Default.List, contentDescription = "Mis Trámites")
+                                Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Mis Trámites")
                             }
                         } else {
-                            Icon(Icons.Default.List, contentDescription = "Mis Trámites")
+                            Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Mis Trámites")
                         }
                     },
                     label = { Text("Mis Trámites") },
                     selected = true,
-                    onClick = { }
+                    onClick = { },
+                    colors = navBarColors
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Place, contentDescription = "Mapa") },
                     label = { Text("Mapa") },
                     selected = false,
-                    onClick = onMapClick
+                    onClick = onMapClick,
+                    colors = navBarColors
                 )
             }
         }
@@ -242,11 +260,7 @@ fun MyTramiteCard(item: TramiteProgress, onClick: (String) -> Unit) {
                         fontSize = 15.sp,
                         color = Color(0xFF1A3B70)
                     )
-                    Text(
-                        text = "Hoy 08:32",
-                        fontSize = 10.sp,
-                        color = Color.Gray
-                    )
+                    // Eliminado el hardcoded "Hoy 08:32" si no se usa
                 }
                 Text(
                     item.tramite.entidad,
