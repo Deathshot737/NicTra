@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -39,6 +40,7 @@ import com.nictra.data.repository.SyncRepository
 import com.nictra.data.repository.TramiteRepository
 import com.nictra.ui.home.HomeScreen
 import com.nictra.ui.map.MapScreen
+import com.nictra.ui.settings.SettingsScreen
 import com.nictra.ui.tramites.MyTramitesScreen
 import com.nictra.ui.tramites.TramiteDetailScreen
 import com.nictra.ui.tramites.TramitesListScreen
@@ -68,18 +70,35 @@ private val NicTraColorScheme = lightColorScheme(
     surfaceTint = Color.Transparent
 )
 
+private val NicTraDarkColorScheme = darkColorScheme(
+    primary = Color(0xFF90CAF9),
+    onPrimary = Color(0xFF0D47A1),
+    primaryContainer = Color(0xFF1976D2),
+    onPrimaryContainer = Color(0xFFE3F2FD),
+    secondary = Color(0xFF81C784),
+    onSecondary = Color(0xFF1B5E20),
+    background = Color(0xFF121212),
+    surface = Color(0xFF1E1E1E),
+    onSurface = Color.White,
+    onBackground = Color.White
+)
+
 @Composable
-fun NicTraTheme(content: @Composable () -> Unit) {
+fun NicTraTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
+    val colorScheme = if (darkTheme) NicTraDarkColorScheme else NicTraColorScheme
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = NictraBlue.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            window.statusBarColor = if (darkTheme) Color(0xFF121212).toArgb() else NictraBlue.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
     MaterialTheme(
-        colorScheme = NicTraColorScheme,
+        colorScheme = colorScheme,
         content = content
     )
 }
@@ -99,6 +118,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             val lifecycleOwner = LocalLifecycleOwner.current
             var isSyncing by remember { mutableStateOf(false) }
+            
+            val darkModePref by syncPrefs.darkMode.collectAsState(initial = null)
+            val useDarkTheme = darkModePref ?: isSystemInDarkTheme()
 
             // Navigation states
             var showWelcome by remember { mutableStateOf(true) }
@@ -106,6 +128,7 @@ class MainActivity : ComponentActivity() {
             var selectedTramiteId by remember { mutableStateOf<String?>(null) }
             var showMyTramites by remember { mutableStateOf(false) }
             var showMap by remember { mutableStateOf(false) }
+            var showSettings by remember { mutableStateOf(false) }
             var selectedDelegationId by remember { mutableStateOf<String?>(null) }
 
             // Drawer State
@@ -137,7 +160,7 @@ class MainActivity : ComponentActivity() {
             var searchQuery by remember { mutableStateOf("") }
             val searchResults by repository.searchTramites(searchQuery).collectAsState(initial = emptyList())
 
-            NicTraTheme {
+            NicTraTheme(darkTheme = useDarkTheme) {
                 // RTL provider to make the Drawer slide from the RIGHT
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     ModalNavigationDrawer(
@@ -148,7 +171,7 @@ class MainActivity : ComponentActivity() {
                             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                                 ModalDrawerSheet(
                                     modifier = Modifier.fillMaxHeight().width(300.dp),
-                                    drawerContainerColor = Color.White
+                                    drawerContainerColor = MaterialTheme.colorScheme.surface
                                 ) {
                                     DrawerHeader()
                                     
@@ -167,17 +190,17 @@ class MainActivity : ComponentActivity() {
                                         
                                         DrawerItem(label = "Inicio", icon = Icons.Default.Home, onClick = {
                                             scope.launch { drawerState.close() }
-                                            showMap = false; showMyTramites = false; selectedCategory = null; selectedTramiteId = null
+                                            showMap = false; showMyTramites = false; showSettings = false; selectedCategory = null; selectedTramiteId = null
                                         })
                                         
                                         DrawerItem(label = "Mis Trámites", icon = Icons.Default.List, badgeCount = completedCount, onClick = {
                                             scope.launch { drawerState.close() }
-                                            showMap = false; showMyTramites = true; selectedCategory = null; selectedTramiteId = null
+                                            showMap = false; showMyTramites = true; showSettings = false; selectedCategory = null; selectedTramiteId = null
                                         })
                                         
                                         DrawerItem(label = "Mapa de Delegaciones", icon = Icons.Default.Place, onClick = {
                                             scope.launch { drawerState.close() }
-                                            showMap = true; showMyTramites = false; selectedCategory = null; selectedTramiteId = null
+                                            showMap = true; showMyTramites = false; showSettings = false; selectedCategory = null; selectedTramiteId = null
                                         })
 
                                         Spacer(modifier = Modifier.height(16.dp))
@@ -192,9 +215,23 @@ class MainActivity : ComponentActivity() {
                                         categorias.forEach { cat ->
                                             DrawerItem(label = cat.nombre, emoji = cat.icono, onClick = {
                                                 scope.launch { drawerState.close() }
-                                                selectedCategory = cat; showMap = false; showMyTramites = false; selectedTramiteId = null
+                                                selectedCategory = cat; showMap = false; showMyTramites = false; showSettings = false; selectedTramiteId = null
                                             })
                                         }
+                                        
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Text(
+                                            "AJUSTES", 
+                                            modifier = Modifier.padding(16.dp), 
+                                            fontSize = 12.sp, 
+                                            fontWeight = FontWeight.Bold, 
+                                            color = Color.Gray
+                                        )
+                                        
+                                        DrawerItem(label = "Configuración", icon = Icons.Default.Settings, onClick = {
+                                            scope.launch { drawerState.close() }
+                                            showSettings = true; showMap = false; showMyTramites = false; selectedCategory = null; selectedTramiteId = null
+                                        })
 
                                         Spacer(modifier = Modifier.height(32.dp))
                                         Text(
@@ -215,6 +252,13 @@ class MainActivity : ComponentActivity() {
                                 when {
                                     showWelcome -> {
                                         WelcomeScreen(onNavigateToHome = { showWelcome = false })
+                                    }
+                                    showSettings -> {
+                                        SettingsScreen(
+                                            isDarkMode = useDarkTheme,
+                                            onDarkModeChange = { lifecycleScope.launch { syncPrefs.setDarkMode(it) } },
+                                            onBackClick = { showSettings = false }
+                                        )
                                     }
                                     selectedTramiteId != null -> {
                                         val tramite by repository.getTramiteByIdFlow(selectedTramiteId!!).collectAsState(initial = null)

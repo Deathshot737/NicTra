@@ -45,14 +45,19 @@ fun HomeScreen(
     Scaffold(
         bottomBar = {
             NavigationBar(
-                containerColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.surface,
                 tonalElevation = 8.dp
             ) {
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
                     label = { Text("Inicio") },
                     selected = true,
-                    onClick = { }
+                    onClick = { },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                    )
                 )
                 NavigationBarItem(
                     icon = { 
@@ -66,13 +71,23 @@ fun HomeScreen(
                     },
                     label = { Text("Mis Trámites") },
                     selected = false,
-                    onClick = onMyTramitesClick
+                    onClick = onMyTramitesClick,
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                    )
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Place, contentDescription = "Mapa") },
                     label = { Text("Mapa") },
                     selected = false,
-                    onClick = onMapClick
+                    onClick = onMapClick,
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                    )
                 )
             }
         }
@@ -87,7 +102,7 @@ fun HomeScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFFF5F7FA))
+                    .background(MaterialTheme.colorScheme.background)
             ) {
                 item {
                     HeaderSection(searchQuery, onSearchQueryChange, onMenuClick)
@@ -102,7 +117,7 @@ fun HomeScreen(
                             Text(
                                 "No se encontraron trámites con ese nombre.",
                                 modifier = Modifier.padding(16.dp),
-                                color = Color.Gray
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     } else {
@@ -133,7 +148,7 @@ fun HomeScreen(
                             Text(
                                 "No hay trámites recientes",
                                 modifier = Modifier.padding(16.dp),
-                                color = Color.Gray,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 14.sp
                             )
                         }
@@ -157,7 +172,7 @@ fun HeaderSection(searchQuery: String, onSearchQueryChange: (String) -> Unit, on
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
-            .background(Color(0xFF1A3B70))
+            .background(MaterialTheme.colorScheme.primary)
             .padding(24.dp)
     ) {
         // Icono de hamburguesa a la derecha
@@ -168,7 +183,7 @@ fun HeaderSection(searchQuery: String, onSearchQueryChange: (String) -> Unit, on
             Icon(
                 Icons.Default.Menu, 
                 contentDescription = "Menú", 
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(28.dp)
             )
         }
@@ -190,13 +205,13 @@ fun HeaderSection(searchQuery: String, onSearchQueryChange: (String) -> Unit, on
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Servicios ciudadanos - Nicaragua",
-                color = Color.White.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
                 fontSize = 14.sp
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "¡Bienvenid@!",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -208,24 +223,24 @@ fun HeaderSection(searchQuery: String, onSearchQueryChange: (String) -> Unit, on
                 value = searchQuery,
                 onValueChange = onSearchQueryChange,
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Buscar trámite: Licencia, Pasaporte...", color = Color.Gray) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
+                placeholder = { Text("Buscar trámite: Licencia, Pasaporte...", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)) },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                 trailingIcon = { 
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { onSearchQueryChange("") }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Borrar", tint = Color.Gray)
+                            Icon(Icons.Default.Clear, contentDescription = "Borrar", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     } else {
                         Surface(
                             shape = RoundedCornerShape(8.dp),
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.surface,
                             modifier = Modifier.padding(end = 8.dp).size(36.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     Icons.Default.LocationOn, 
                                     contentDescription = null, 
-                                    tint = Color(0xFF1A3B70),
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -233,12 +248,12 @@ fun HeaderSection(searchQuery: String, onSearchQueryChange: (String) -> Unit, on
                     }
                 },
                 shape = RoundedCornerShape(12.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    disabledContainerColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    disabledContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
                 )
             )
         }
@@ -252,7 +267,7 @@ fun SectionTitle(title: String) {
         fontSize = 18.sp,
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 12.dp),
-        color = Color(0xFF1A3B70)
+        color = MaterialTheme.colorScheme.primary
     )
 }
 
@@ -304,7 +319,7 @@ fun CategoryItem(
     ) {
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = Color.White,
+            color = MaterialTheme.colorScheme.surface,
             shadowElevation = 2.dp,
             modifier = Modifier.size(64.dp)
         ) {
@@ -319,7 +334,7 @@ fun CategoryItem(
             maxLines = 2,
             lineHeight = 14.sp,
             textAlign = TextAlign.Center,
-            color = Color.DarkGray,
+            color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.fillMaxWidth()
         )
@@ -333,7 +348,7 @@ fun RecentTramiteCard(tramite: TramiteEntity, onTramiteClick: (String) -> Unit) 
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
             .clickable { onTramiteClick(tramite.id) },
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
@@ -344,7 +359,7 @@ fun RecentTramiteCard(tramite: TramiteEntity, onTramiteClick: (String) -> Unit) 
             Box(
                 modifier = Modifier
                     .size(48.dp)
-                    .background(Color(0xFFF5F7FA), RoundedCornerShape(12.dp)),
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(tramite.icono, fontSize = 24.sp)
@@ -357,12 +372,12 @@ fun RecentTramiteCard(tramite: TramiteEntity, onTramiteClick: (String) -> Unit) 
                     text = tramite.titulo,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = Color(0xFF1A3B70)
+                    color = MaterialTheme.colorScheme.primary
                 )
                 Text(
                     text = tramite.entidad,
                     fontSize = 12.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -370,9 +385,9 @@ fun RecentTramiteCard(tramite: TramiteEntity, onTramiteClick: (String) -> Unit) 
                         imageVector = Icons.Default.Info, 
                         contentDescription = null, 
                         modifier = Modifier.size(14.dp), 
-                        tint = Color.Gray
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Text(" ${tramite.tiempoEstimado}", fontSize = 12.sp, color = Color.Gray)
+                    Text(" ${tramite.tiempoEstimado}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.width(12.dp))
                     Icon(
                         imageVector = Icons.Default.Star, 
@@ -380,14 +395,14 @@ fun RecentTramiteCard(tramite: TramiteEntity, onTramiteClick: (String) -> Unit) 
                         modifier = Modifier.size(14.dp), 
                         tint = Color(0xFFFBC02D)
                     )
-                    Text(" ${tramite.costo}", fontSize = 12.sp, color = Color.Gray)
+                    Text(" ${tramite.costo}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             
             Icon(
                 imageVector = Icons.Default.ArrowForward,
                 contentDescription = null,
-                tint = Color.LightGray,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                 modifier = Modifier.size(24.dp)
             )
         }

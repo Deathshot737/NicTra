@@ -39,12 +39,12 @@ fun TramitesListScreen(
                             text = categoriaNombre,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                         Text(
                             text = "${tramites.size} trámites disponibles",
                             fontSize = 12.sp,
-                            color = Color.White.copy(alpha = 0.7f)
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
                         )
                     }
                 },
@@ -53,12 +53,12 @@ fun TramitesListScreen(
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Regresar",
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1A3B70)
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             )
         }
@@ -67,7 +67,7 @@ fun TramitesListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(Color(0xFFF5F7FA)),
+                .background(MaterialTheme.colorScheme.background),
             contentPadding = PaddingValues(vertical = 12.dp)
         ) {
             items(tramites) { tramite ->
@@ -84,7 +84,7 @@ fun TramiteListItem(tramite: TramiteEntity, onClick: () -> Unit) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
@@ -95,7 +95,7 @@ fun TramiteListItem(tramite: TramiteEntity, onClick: () -> Unit) {
             Box(
                 modifier = Modifier
                     .size(48.dp)
-                    .background(Color(0xFFF5F7FA), RoundedCornerShape(12.dp)),
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 // Si el icono es un emoji o texto
@@ -109,12 +109,12 @@ fun TramiteListItem(tramite: TramiteEntity, onClick: () -> Unit) {
                     text = tramite.titulo,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = Color(0xFF1A3B70)
+                    color = MaterialTheme.colorScheme.primary
                 )
                 Text(
                     text = tramite.entidad,
                     fontSize = 12.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -122,9 +122,9 @@ fun TramiteListItem(tramite: TramiteEntity, onClick: () -> Unit) {
                         imageVector = Icons.Default.Info, 
                         contentDescription = null, 
                         modifier = Modifier.size(14.dp), 
-                        tint = Color.Gray
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Text(" ${tramite.tiempoEstimado}", fontSize = 12.sp, color = Color.Gray)
+                    Text(" ${tramite.tiempoEstimado}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.width(12.dp))
                     Icon(
                         imageVector = Icons.Default.Star, 
@@ -132,14 +132,14 @@ fun TramiteListItem(tramite: TramiteEntity, onClick: () -> Unit) {
                         modifier = Modifier.size(14.dp), 
                         tint = Color(0xFFFBC02D)
                     )
-                    Text(" ${tramite.costo}", fontSize = 12.sp, color = Color.Gray)
+                    Text(" ${tramite.costo}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             
             Icon(
                 imageVector = Icons.Default.ArrowForward,
                 contentDescription = null,
-                tint = Color.LightGray,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                 modifier = Modifier.size(24.dp)
             )
         }

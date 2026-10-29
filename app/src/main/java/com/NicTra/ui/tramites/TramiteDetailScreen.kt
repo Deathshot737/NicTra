@@ -8,6 +8,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -64,7 +65,7 @@ fun TramiteDetailScreen(
     if (showSuccessDialog) {
         AlertDialog(
             onDismissRequest = { showSuccessDialog = false },
-            icon = { Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF2E7D32), modifier = Modifier.size(48.dp)) },
+            icon = { Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF4CAF50), modifier = Modifier.size(48.dp)) },
             title = { Text("¡Trámite Finalizado!", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
             text = { Text("Has completado este trámite con éxito. Ahora aparecerá en tu sección de trámites completados.", textAlign = TextAlign.Center) },
             confirmButton = {
@@ -100,7 +101,7 @@ fun TramiteDetailScreen(
                             onBackClick()
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
                     Text("Confirmar")
                 }
@@ -120,24 +121,24 @@ fun TramiteDetailScreen(
                 title = { },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás", tint = Color.White)
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás", tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
                 actions = {
                     if (isTracking) {
                         IconButton(onClick = { showResetConfirm = true }) {
-                            Icon(Icons.Outlined.Delete, contentDescription = "Quitar", tint = Color.White)
+                            Icon(Icons.Outlined.Delete, contentDescription = "Quitar", tint = MaterialTheme.colorScheme.onPrimary)
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A3B70))
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
             )
         },
         bottomBar = {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shadowElevation = 16.dp,
-                color = Color.White
+                color = MaterialTheme.colorScheme.surface
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     if (!isTracking) {
@@ -151,8 +152,8 @@ fun TramiteDetailScreen(
                             modifier = Modifier.fillMaxWidth().height(56.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF1A3B70),
-                                contentColor = Color.White
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
                             )
                         ) {
                             Icon(Icons.Default.Add, contentDescription = null)
@@ -165,10 +166,10 @@ fun TramiteDetailScreen(
                             modifier = Modifier.fillMaxWidth().height(56.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFF5F7FA),
-                                contentColor = Color(0xFF1A3B70)
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = MaterialTheme.colorScheme.primary
                             ),
-                            border = BorderStroke(1.dp, Color(0xFF1A3B70).copy(alpha = 0.2f))
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                         ) {
                             Icon(Icons.Default.Refresh, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
@@ -184,8 +185,8 @@ fun TramiteDetailScreen(
                                 modifier = Modifier.fillMaxWidth().height(56.dp),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF1A3B70),
-                                    contentColor = Color.White
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
                                 )
                             ) {
                                 Icon(Icons.Default.DoneAll, contentDescription = null)
@@ -200,9 +201,10 @@ fun TramiteDetailScreen(
                             modifier = Modifier.fillMaxWidth().height(56.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFD4EED8),
-                                contentColor = Color(0xFF2E7D32)
-                            )
+                                containerColor = Color(0xFF4CAF50).copy(alpha = 0.1f),
+                                contentColor = Color(0xFF4CAF50)
+                            ),
+                            border = BorderStroke(1.dp, Color(0xFF4CAF50).copy(alpha = 0.2f))
                         ) {
                             Icon(Icons.Default.Save, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
@@ -217,20 +219,20 @@ fun TramiteDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(Color(0xFFF5F7FA))
+                .background(MaterialTheme.colorScheme.background)
         ) {
             item {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFF1A3B70))
+                        .background(MaterialTheme.colorScheme.primary)
                         .padding(horizontal = 24.dp, vertical = 16.dp)
                 ) {
                     Column {
-                        Text(tramite.entidad, color = Color.White.copy(alpha = 0.7f), fontSize = 12.sp)
+                        Text(tramite.entidad, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f), fontSize = 12.sp)
                         Text(
                             tramite.titulo,
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -312,7 +314,7 @@ fun SectionHeader(title: String) {
         modifier = Modifier.padding(start = 24.dp, top = 16.dp, bottom = 8.dp),
         fontWeight = FontWeight.Bold,
         fontSize = 16.sp,
-        color = Color(0xFF1A3B70)
+        color = MaterialTheme.colorScheme.primary
     )
 }
 
@@ -322,17 +324,17 @@ fun PasoCard(paso: PasoEntity) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
             Surface(
                 modifier = Modifier.size(24.dp),
                 shape = CircleShape,
-                color = Color(0xFF1A3B70)
+                color = MaterialTheme.colorScheme.primary
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(paso.orden.toString(), color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text(paso.orden.toString(), color = MaterialTheme.colorScheme.onPrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Spacer(modifier = Modifier.width(12.dp))
@@ -347,7 +349,7 @@ fun ProgressCard(checked: Int, total: Int, progress: Float) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
@@ -357,7 +359,7 @@ fun ProgressCard(checked: Int, total: Int, progress: Float) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text("Mi progreso de documentos", fontWeight = FontWeight.Medium, fontSize = 14.sp)
-                Text("$checked/$total", fontWeight = FontWeight.Bold, color = Color(0xFF1A3B70))
+                Text("$checked/$total", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
             }
             Spacer(modifier = Modifier.height(12.dp))
             LinearProgressIndicator(
@@ -367,10 +369,10 @@ fun ProgressCard(checked: Int, total: Int, progress: Float) {
                     .height(10.dp)
                     .clip(CircleShape),
                 color = Color(0xFFFFC107),
-                trackColor = Color(0xFFF1F1F1)
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Toca cada documento para marcarlo como obtenido.", color = Color.Gray, fontSize = 12.sp)
+            Text("Toca cada documento para marcarlo como obtenido.", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
         }
     }
 }
@@ -392,7 +394,7 @@ fun RequisitoCard(
                 color = if (requisito.isChecked) Color(0xFFFFC107) else Color.Transparent,
                 shape = RoundedCornerShape(12.dp)
             ),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
@@ -407,7 +409,7 @@ fun RequisitoCard(
                     Text(requisito.descripcion, fontSize = 14.sp, fontWeight = FontWeight.Medium)
                     requisito.nota?.let {
                         Surface(
-                            color = if (requisito.esTramitePrevio) Color(0xFFFFF9C4) else Color(0xFFF5F5F5),
+                            color = if (requisito.esTramitePrevio) Color(0xFFFFF9C4).copy(alpha = if(isSystemInDarkTheme()) 0.2f else 1f) else MaterialTheme.colorScheme.surfaceVariant,
                             shape = RoundedCornerShape(4.dp),
                             modifier = Modifier.padding(top = 4.dp)
                         ) {
@@ -415,7 +417,7 @@ fun RequisitoCard(
                                 text = it,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                                 fontSize = 10.sp,
-                                color = if (requisito.esTramitePrevio) Color(0xFFFBC02D) else Color.Gray,
+                                color = if (requisito.esTramitePrevio) Color(0xFFFFC107) else MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -425,7 +427,7 @@ fun RequisitoCard(
                     Icon(
                         if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                         contentDescription = null,
-                        tint = Color.Gray
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -434,7 +436,7 @@ fun RequisitoCard(
                     "Asegúrate de llevar este documento en original y copia para evitar retrasos en ventanilla.",
                     modifier = Modifier.padding(start = 48.dp, top = 8.dp, bottom = 8.dp),
                     fontSize = 12.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -445,12 +447,12 @@ fun RequisitoCard(
 fun TagItem(text: String) {
     Surface(
         shape = RoundedCornerShape(8.dp),
-        color = Color.White.copy(alpha = 0.15f)
+        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f)
     ) {
         Text(
             text = text,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onPrimary,
             fontSize = 11.sp,
             fontWeight = FontWeight.Medium
         )
@@ -464,32 +466,32 @@ fun DelegacionCard(delegacion: DelegacionEntity, onClick: () -> Unit) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Surface(
                 modifier = Modifier.size(44.dp),
                 shape = RoundedCornerShape(10.dp),
-                color = Color(0xFFF5F7FA)
+                color = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.LocationOn, contentDescription = null, tint = Color(0xFF1A3B70))
+                    Icon(Icons.Default.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 }
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(delegacion.nombreOficina, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Text(delegacion.direccion, fontSize = 12.sp, color = Color.Gray)
+                Text(delegacion.direccion, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Surface(
-                color = Color(0xFFE8F5E9),
+                color = Color(0xFF4CAF50).copy(alpha = 0.1f),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
                     "Abierto",
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    color = Color(0xFF2E7D32),
+                    color = Color(0xFF4CAF50),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold
                 )
