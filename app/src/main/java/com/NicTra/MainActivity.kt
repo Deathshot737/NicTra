@@ -99,7 +99,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             val lifecycleOwner = LocalLifecycleOwner.current
             var isSyncing by remember { mutableStateOf(false) }
-            var syncFailed by remember { mutableStateOf(false) }
 
             // Navigation states
             var showWelcome by remember { mutableStateOf(true) }
@@ -113,16 +112,17 @@ class MainActivity : ComponentActivity() {
             val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
             val scope = rememberCoroutineScope()
 
-            // Synchronization observer
+            // Synchronization observer (Silent initial sync)
             DisposableEffect(lifecycleOwner) {
                 val observer = LifecycleEventObserver { _, event ->
                     if (event == Lifecycle.Event.ON_RESUME) {
                         lifecycleScope.launch {
-                            isSyncing = true
                             val lastSync = syncPrefs.ultimaActualizacion.first()
-                            val result = syncRepository.syncFeed(force = lastSync == null)
-                            syncFailed = result.isFailure
-                            isSyncing = false
+                            if (lastSync == null) {
+                                isSyncing = true
+                                syncRepository.syncFeed(force = true)
+                                isSyncing = false
+                            }
                         }
                     }
                 }
@@ -133,7 +133,6 @@ class MainActivity : ComponentActivity() {
             // Data for Drawer and Shared use
             val categorias by repository.getAllCategorias().collectAsState(initial = emptyList())
             val completedCount by repository.getCompletedTramitesCount().collectAsState(initial = 0)
-            val lastSyncDate by repository.lastSyncDate.collectAsState(initial = null)
             
             var searchQuery by remember { mutableStateOf("") }
             val searchResults by repository.searchTramites(searchQuery).collectAsState(initial = emptyList())
@@ -197,24 +196,6 @@ class MainActivity : ComponentActivity() {
                                             })
                                         }
 
-                                        Spacer(modifier = Modifier.height(16.dp))
-                                        Text(
-                                            "ACCIONES", 
-                                            modifier = Modifier.padding(16.dp), 
-                                            fontSize = 12.sp, 
-                                            fontWeight = FontWeight.Bold, 
-                                            color = Color.Gray
-                                        )
-                                        
-                                        DrawerItem(label = "Sincronizar ahora", icon = Icons.Default.Refresh, onClick = {
-                                            scope.launch { 
-                                                drawerState.close()
-                                                isSyncing = true
-                                                syncRepository.syncFeed(force = true)
-                                                isSyncing = false
-                                            }
-                                        })
-                                        
                                         Spacer(modifier = Modifier.height(32.dp))
                                         Text(
                                             "NicTra Nicaragua v1.0.1", 
@@ -297,16 +278,14 @@ class MainActivity : ComponentActivity() {
                                             recentTramites = recentTramites,
                                             searchResults = searchResults,
                                             searchQuery = searchQuery,
-                                            lastSyncDate = lastSyncDate,
                                             isSyncing = isSyncing,
-                                            syncFailed = syncFailed,
                                             onSearchQueryChange = { searchQuery = it },
                                             completedCount = completedCount,
                                             onCategoryClick = { selectedCategory = it },
                                             onTramiteClick = { selectedTramiteId = it },
                                             onMyTramitesClick = { showMyTramites = true },
                                             onMapClick = { showMap = true },
-                                            onSyncClick = { lifecycleScope.launch { isSyncing = true; syncRepository.syncFeed(force = true); isSyncing = false } },
+                                            onRefresh = { lifecycleScope.launch { isSyncing = true; syncRepository.syncFeed(force = true); isSyncing = false } },
                                             onMenuClick = { scope.launch { drawerState.open() } }
                                         )
                                     }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,10 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nictra.data.local.entities.CategoriaEntity
 import com.nictra.data.local.entities.TramiteEntity
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,16 +32,14 @@ fun HomeScreen(
     recentTramites: List<TramiteEntity>,
     searchResults: List<TramiteEntity>,
     searchQuery: String,
-    lastSyncDate: String?,
     isSyncing: Boolean,
-    syncFailed: Boolean,
     onSearchQueryChange: (String) -> Unit,
     completedCount: Int,
     onCategoryClick: (CategoriaEntity) -> Unit,
     onTramiteClick: (String) -> Unit,
     onMyTramitesClick: () -> Unit,
     onMapClick: () -> Unit,
-    onSyncClick: () -> Unit,
+    onRefresh: () -> Unit,
     onMenuClick: () -> Unit
 ) {
     Scaffold(
@@ -82,141 +77,74 @@ fun HomeScreen(
             }
         }
     ) { padding ->
-        LazyColumn(
+        PullToRefreshBox(
+            isRefreshing = isSyncing,
+            onRefresh = onRefresh,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(Color(0xFFF5F7FA))
         ) {
-            item {
-                HeaderSection(searchQuery, onSearchQueryChange, onMenuClick)
-            }
-
-            item {
-                SyncStatusBanner(lastSyncDate, isSyncing, syncFailed, onSyncClick)
-            }
-
-            if (searchQuery.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFFF5F7FA))
+            ) {
                 item {
-                    SectionTitle("Resultados para \"$searchQuery\"")
+                    HeaderSection(searchQuery, onSearchQueryChange, onMenuClick)
                 }
-                if (searchResults.isEmpty()) {
+
+                if (searchQuery.isNotEmpty()) {
                     item {
-                        Text(
-                            "No se encontraron trámites con ese nombre.",
-                            modifier = Modifier.padding(16.dp),
-                            color = Color.Gray
-                        )
+                        SectionTitle("Resultados para \"$searchQuery\"")
+                    }
+                    if (searchResults.isEmpty()) {
+                        item {
+                            Text(
+                                "No se encontraron trámites con ese nombre.",
+                                modifier = Modifier.padding(16.dp),
+                                color = Color.Gray
+                            )
+                        }
+                    } else {
+                        items(searchResults) { tramite ->
+                            RecentTramiteCard(tramite, onTramiteClick)
+                        }
                     }
                 } else {
-                    items(searchResults) { tramite ->
-                        RecentTramiteCard(tramite, onTramiteClick)
-                    }
-                }
-            } else {
-                item {
-                    SectionTitle("¿Qué necesitas hacer hoy?")
-                    CategoriesGrid(categorias, onCategoryClick)
-                }
-                
-                if (quickAccess.isNotEmpty()) {
                     item {
-                        SectionTitle("Accesos rápidos")
+                        SectionTitle("¿Qué necesitas hacer hoy?")
+                        CategoriesGrid(categorias, onCategoryClick)
                     }
-                    items(quickAccess) { tramite ->
-                        RecentTramiteCard(tramite, onTramiteClick)
+                    
+                    if (quickAccess.isNotEmpty()) {
+                        item {
+                            SectionTitle("Accesos rápidos")
+                        }
+                        items(quickAccess) { tramite ->
+                            RecentTramiteCard(tramite, onTramiteClick)
+                        }
                     }
-                }
-                
-                item {
-                    SectionTitle("Trámites recientes")
-                }
-                if (recentTramites.isEmpty()) {
+                    
                     item {
-                        Text(
-                            "No hay trámites recientes",
-                            modifier = Modifier.padding(16.dp),
-                            color = Color.Gray,
-                            fontSize = 14.sp
-                        )
+                        SectionTitle("Trámites recientes")
                     }
-                } else {
-                    items(recentTramites) { tramite ->
-                        RecentTramiteCard(tramite, onTramiteClick)
+                    if (recentTramites.isEmpty()) {
+                        item {
+                            Text(
+                                "No hay trámites recientes",
+                                modifier = Modifier.padding(16.dp),
+                                color = Color.Gray,
+                                fontSize = 14.sp
+                            )
+                        }
+                    } else {
+                        items(recentTramites) { tramite ->
+                            RecentTramiteCard(tramite, onTramiteClick)
+                        }
                     }
                 }
-            }
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
-    }
-}
-
-@Composable
-fun SyncStatusBanner(
-    lastSyncDate: String?, 
-    isSyncing: Boolean, 
-    syncFailed: Boolean, 
-    onSyncClick: () -> Unit
-) {
-    val formattedDate = remember(lastSyncDate) {
-        if (lastSyncDate != null) {
-            try {
-                val zdt = ZonedDateTime.parse(lastSyncDate)
-                zdt.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault()))
-            } catch (e: Exception) {
-                lastSyncDate
-            }
-        } else {
-            "Nunca sincronizado"
-        }
-    }
-
-    val bannerColor = if (syncFailed) Color(0xFFFFF3F3) else Color.White
-    val textColor = if (syncFailed) Color(0xFFD32F2F) else Color.DarkGray
-
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = bannerColor,
-        shadowElevation = 1.dp
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = if (syncFailed) "Sin conexión - Usando datos locales" else "Contenido actualizado el:",
-                    fontSize = 11.sp,
-                    color = if (syncFailed) Color(0xFFD32F2F) else Color.Gray,
-                    fontWeight = if (syncFailed) FontWeight.Bold else FontWeight.Normal
-                )
-                Text(
-                    text = if (isSyncing) "Sincronizando..." else formattedDate,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = textColor
-                )
-            }
-            
-            if (isSyncing) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp,
-                    color = Color(0xFF1A3B70)
-                )
-            } else {
-                IconButton(onClick = onSyncClick) {
-                    Icon(
-                        Icons.Default.Refresh, 
-                        contentDescription = "Sincronizar ahora",
-                        tint = Color(0xFF1A3B70),
-                        modifier = Modifier.size(20.dp)
-                    )
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
