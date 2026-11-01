@@ -38,17 +38,11 @@ fun WelcomeScreen(onNavigateToHome: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Logo superior
-            Surface(
-                modifier = Modifier.size(80.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = Color.White.copy(alpha = 0.1f)
-            ) {
-                androidx.compose.foundation.Image(
-                    painter = painterResource(id = R.mipmap.logo_foreground),
-                    contentDescription = null,
-                    modifier = Modifier.padding(12.dp)
-                )
-            }
+            androidx.compose.foundation.Image(
+                painter = painterResource(id = R.mipmap.logo_foreground),
+                contentDescription = null,
+                modifier = Modifier.size(130.dp)
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 

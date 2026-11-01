@@ -363,15 +363,11 @@ class MainActivity : ComponentActivity() {
 fun DrawerHeader() {
     Box(modifier = Modifier.fillMaxWidth().background(NictraBlue).padding(24.dp)) {
         Column {
-            Surface(modifier = Modifier.size(60.dp), shape = CircleShape, color = Color.White.copy(alpha = 0.2f)) {
-                Box(contentAlignment = Alignment.Center) {
-                    androidx.compose.foundation.Image(
-                        painter = painterResource(id = R.mipmap.logo_foreground),
-                        contentDescription = null,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
-            }
+            androidx.compose.foundation.Image(
+                painter = painterResource(id = R.mipmap.logo_foreground),
+                contentDescription = null,
+                modifier = Modifier.size(64.dp)
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Text("NicTra Nicaragua", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             Text("Servicios Ciudadanos", color = Color.White.copy(alpha = 0.7f), fontSize = 13.sp)
