@@ -158,18 +158,22 @@ fun MapScreen(
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = NictraBlue,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White,
-                    actionIconContentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         },
         bottomBar = {
-            NavigationBar(containerColor = Color.White, tonalElevation = 8.dp) {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surface,
+                tonalElevation = 8.dp
+            ) {
                 val navBarColors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = NictraBlue,
-                    indicatorColor = NictraBlue.copy(alpha = 0.1f)
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Home, null) },
@@ -235,18 +239,19 @@ fun MapScreen(
                     }
                 },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-                containerColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.primary,
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Icon(Icons.Default.MyLocation, contentDescription = "Mi ubicación", tint = NictraBlue)
+                Icon(Icons.Default.MyLocation, contentDescription = "Mi ubicación")
             }
 
             if (isPreparingMap) {
                 Box(
-                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)).zIndex(10f),
+                    modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background.copy(alpha = 0.8f)).zIndex(10f),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = Color.White)
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             }
         }

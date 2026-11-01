@@ -12,10 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nictra.R
 
 @Composable
 fun WelcomeScreen(onNavigateToHome: () -> Unit) {
@@ -35,19 +37,12 @@ fun WelcomeScreen(onNavigateToHome: () -> Unit) {
                 .padding(top = 40.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Icono superior
-            Surface(
-                modifier = Modifier.size(80.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = Color.White.copy(alpha = 0.1f)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AccountBalance,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.padding(20.dp)
-                )
-            }
+            // Logo superior
+            androidx.compose.foundation.Image(
+                painter = painterResource(id = R.mipmap.logo_foreground),
+                contentDescription = null,
+                modifier = Modifier.size(130.dp)
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 

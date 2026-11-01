@@ -1,47 +1,65 @@
 {{template "head" .}}
-{{if .Err}}<div class="err">{{.Err}}</div>{{end}}
-<div class="row-head">
-  <h1>{{if .IsEdit}}Editar{{else}}Nuevo{{end}} · {{.Title}}</h1>
+{{if .Err}}<div class="err" data-flash>{{.Err}}</div>{{end}}
+<div class="page-head">
+  <div>
+    <p class="eyebrow">{{if .IsEdit}}Editar{{else}}Crear{{end}}</p>
+    <h1>{{if .IsEdit}}Editar{{else}}Nuevo{{end}} · {{.Title}}</h1>
+    <p class="muted page-sub">{{.Entity.Desc}}</p>
+  </div>
+  <a class="lnk" href="/admin/{{.Entity.Slug}}"><span aria-hidden="true">←</span> Volver a la lista</a>
 </div>
-<form method="post" action="/admin/{{.Entity.Slug}}/{{if .IsEdit}}edit{{else}}new{{end}}" class="stack panel">
-  {{if .IsEdit}}
-  <input type="hidden" name="{{.Entity.IDField}}" value="{{val .Item .Entity.IDField}}">
-  {{end}}
+
+<form method="post" action="/admin/{{.Entity.Slug}}/{{if .IsEdit}}edit{{else}}new{{end}}" class="panel form-panel">
+  {{range .Fields}}{{if .Hidden}}
+  <input type="hidden" name="{{.Name}}" value="{{val $.Item .Name}}">
+  {{end}}{{end}}
+  <div class="form-grid">
   {{range .Fields}}
   {{$f := .}}
-  <label>
-    <span>{{$f.Label}}{{if $f.Required}} <abbr title="requerido">*</abbr>{{end}}</span>
+  {{if $f.Hidden}}
+  {{else if eq $f.Type "checkbox"}}
+  <div class="field field--switch">
+    <span class="field-label">{{$f.Label}}</span>
+    <label class="switch">
+      <input type="checkbox" name="{{$f.Name}}" {{if checked $.Item $f.Name}}checked{{end}}>
+      <span class="switch-track" aria-hidden="true"><span class="switch-dot"></span></span>
+      <span class="switch-text">Sí</span>
+    </label>
+    {{if $f.Help}}<small class="muted">{{$f.Help}}</small>{{end}}
+  </div>
+  {{else}}
+  <div class="field{{if eq $f.Type "textarea"}} field--wide{{end}}">
+    <label for="f-{{$f.Name}}">{{$f.Label}}{{if $f.Required}} <abbr title="requerido">*</abbr>{{end}}</label>
     {{if eq $f.Type "textarea"}}
-      <textarea name="{{$f.Name}}" rows="3" {{if $f.Required}}required{{end}}>{{val $.Item $f.Name}}</textarea>
+      <textarea id="f-{{$f.Name}}" name="{{$f.Name}}" rows="3" {{if $f.Required}}required{{end}}>{{val $.Item $f.Name}}</textarea>
     {{else if eq $f.Type "select"}}
-      <select name="{{$f.Name}}" {{if $f.Required}}required{{end}}>
+      <select id="f-{{$f.Name}}" name="{{$f.Name}}" {{if $f.Required}}required{{end}}>
         <option value="">— seleccionar —</option>
         {{range (index $.Options $f.Name)}}
         <option value="{{.Value}}" {{if sel $.Item $f.Name .Value}}selected{{end}}>{{.Label}}</option>
         {{end}}
       </select>
-    {{else if eq $f.Type "checkbox"}}
-      <span class="check"><input type="checkbox" name="{{$f.Name}}" {{if checked $.Item $f.Name}}checked{{end}}> Sí</span>
     {{else if eq $f.Type "int"}}
-      <input type="number" step="1" name="{{$f.Name}}" value="{{val $.Item $f.Name}}" {{if $f.Required}}required{{end}}>
+      <input id="f-{{$f.Name}}" type="number" step="1" name="{{$f.Name}}" value="{{val $.Item $f.Name}}" {{if $f.Required}}required{{end}}>
     {{else if eq $f.Type "number"}}
-      <input type="number" step="any" name="{{$f.Name}}" value="{{val $.Item $f.Name}}" {{if $f.Required}}required{{end}}>
+      <input id="f-{{$f.Name}}" type="number" step="any" name="{{$f.Name}}" value="{{val $.Item $f.Name}}" {{if $f.Required}}required{{end}}>
     {{else}}
-      <input type="text" name="{{$f.Name}}" value="{{val $.Item $f.Name}}" {{if $f.Required}}required{{end}}>
+      <input id="f-{{$f.Name}}" type="text" name="{{$f.Name}}" value="{{val $.Item $f.Name}}" {{if $f.Required}}required{{end}}>
     {{end}}
     {{if $f.Help}}<small class="muted">{{$f.Help}}</small>{{end}}
-  </label>
+  </div>
+  {{end}}
   {{end}}
 
   {{if eq .Entity.Slug "delegaciones"}}
   <div class="map-section">
-    <label>
-      <span>Ubicación en el mapa</span>
-      <small class="muted">Haz clic en el mapa para seleccionar la posición. Se actualizarán latitud y longitud automáticamente.</small>
-    </label>
+    <div>
+      <span class="field-label">Ubicación en el mapa</span>
+      <small class="muted">Haz clic en el mapa o arrastra el marcador para actualizar latitud y longitud.</small>
+    </div>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <div id="map-picker" style="height: 320px; width: 100%; border-radius: 8px; border: 1px solid var(--line); margin-top: 8px;"></div>
+    <div id="map-picker"></div>
     <script>
       (function() {
         var latInput = document.querySelector('input[name="latitud"]');
@@ -71,10 +89,52 @@
     </script>
   </div>
   {{end}}
+  </div>
+
+  {{range .LinkGroups}}
+  {{$g := .}}
+  <section class="assign-section" data-assign>
+    <div class="assign-head">
+      <div>
+        <h2>{{.Title}}</h2>
+        <p class="muted">{{.Help}}</p>
+      </div>
+      <div class="assign-tools">
+        {{if .Options}}
+        <label class="assign-search-wrap" for="assign-search-{{.FieldName}}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+          <input id="assign-search-{{.FieldName}}" type="search" class="assign-search" placeholder="Filtrar…" autocomplete="off">
+        </label>
+        {{end}}
+        <span class="chip" data-assign-count data-total="{{len .Options}}">{{if .SelectedCount}}{{.SelectedCount}} de {{len .Options}} seleccionadas{{else}}{{len .Options}} disponibles{{end}}</span>
+      </div>
+    </div>
+    {{if .Options}}
+    <div class="assign-bulk">
+      <button type="button" class="lnk" data-assign-all>Seleccionar visibles</button>
+      <button type="button" class="lnk" data-assign-none>Limpiar</button>
+    </div>
+    <div class="assign-grid">
+      {{range .Options}}
+      <label class="assign-item">
+        <input type="checkbox" name="{{$g.FieldName}}" value="{{.Value}}" {{if .Selected}}checked{{end}}>
+        <span class="assign-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></span>
+        <span class="assign-body">
+          <span class="assign-title">{{.Label}}</span>
+          {{if .Detail}}<span class="assign-detail">{{.Detail}}</span>{{end}}
+        </span>
+      </label>
+      {{end}}
+    </div>
+    {{else}}
+    <p class="assign-empty muted">Todavía no hay opciones para asignar. Crea primero el registro correspondiente.</p>
+    {{end}}
+  </section>
+  {{end}}
 
   <div class="form-actions">
-    <button type="submit">Guardar</button>
     <a href="/admin/{{.Entity.Slug}}" class="lnk">Cancelar</a>
+    <button type="submit" class="btn">Guardar</button>
   </div>
 </form>
 {{template "footer"}}

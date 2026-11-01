@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
@@ -161,6 +162,21 @@ class MainActivity : ComponentActivity() {
             val searchResults by repository.searchTramites(searchQuery).collectAsState(initial = emptyList())
 
             NicTraTheme(darkTheme = useDarkTheme) {
+                val activity = LocalView.current.context as? Activity
+                BackHandler(enabled = true) {
+                    when {
+                        selectedTramiteId != null -> selectedTramiteId = null
+                        showSettings -> showSettings = false
+                        showMap -> {
+                            showMap = false
+                            selectedDelegationId = null
+                        }
+                        showMyTramites -> showMyTramites = false
+                        selectedCategory != null -> selectedCategory = null
+                        showWelcome -> activity?.finish()
+                        else -> activity?.finish()
+                    }
+                }
                 // RTL provider to make the Drawer slide from the RIGHT
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     ModalNavigationDrawer(
@@ -347,9 +363,11 @@ class MainActivity : ComponentActivity() {
 fun DrawerHeader() {
     Box(modifier = Modifier.fillMaxWidth().background(NictraBlue).padding(24.dp)) {
         Column {
-            Surface(modifier = Modifier.size(60.dp), shape = CircleShape, color = Color.White.copy(alpha = 0.2f)) {
-                Box(contentAlignment = Alignment.Center) { Icon(Icons.Default.Person, null, modifier = Modifier.size(36.dp), tint = Color.White) }
-            }
+            androidx.compose.foundation.Image(
+                painter = painterResource(id = R.mipmap.logo_foreground),
+                contentDescription = null,
+                modifier = Modifier.size(64.dp)
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Text("NicTra Nicaragua", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             Text("Servicios Ciudadanos", color = Color.White.copy(alpha = 0.7f), fontSize = 13.sp)
