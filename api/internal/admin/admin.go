@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/subtle"
 	"embed"
@@ -52,6 +53,12 @@ func New(s store.Store, token string, onChange func()) (*Admin, error) {
 		"checked": fieldChecked,
 		"sel":     fieldSelected,
 		"add":     func(a, b int) int { return a + b },
+		"label": func(labels map[string]string, field, value string) string {
+			if labels == nil {
+				return ""
+			}
+			return labels[field+"\x00"+value]
+		},
 	}
 	t, err := template.New("").Funcs(funcs).ParseFS(assets, "templates/*.html")
 	if err != nil {
@@ -205,6 +212,7 @@ func (a *Admin) handleDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	a.render(w, "dashboard.html", map[string]any{
 		"Title":    "Panel de administración",
+		"Active":   "inicio",
 		"Entities": a.ents,
 		"Counts":   counts,
 	})
@@ -218,9 +226,11 @@ func (a *Admin) handleList(w http.ResponseWriter, r *http.Request, ent *Entity) 
 	}
 	a.render(w, "list.html", map[string]any{
 		"Title":    ent.Label,
+		"Active":   ent.Slug,
 		"Entity":   ent,
 		"Entities": a.ents,
 		"Rows":     rows,
+		"Labels":   a.listLabels(r, ent),
 		"Flash":    r.URL.Query().Get("flash"),
 		"Err":      r.URL.Query().Get("error"),
 	})
@@ -240,23 +250,26 @@ func (a *Admin) handleFormFromQuery(w http.ResponseWriter, r *http.Request, ent 
 	item, err := ent.Get(r.Context(), id)
 	if err != nil {
 		a.render(w, "form.html", map[string]any{
-			"Title": ent.Label, "Entity": ent, "Entities": a.ents,
+			"Title": ent.Label, "Active": ent.Slug, "Entity": ent, "Entities": a.ents,
 			"Err": "No se encontró: " + id, "Fields": ent.Fields, "Options": opts,
+			"LinkGroups": a.resolveLinks(r, ent, nil),
 		})
 		return
 	}
 	_ = oerr
 	a.render(w, "form.html", map[string]any{
-		"Title": ent.Label, "Entity": ent, "Entities": a.ents,
+		"Title": ent.Label, "Active": ent.Slug, "Entity": ent, "Entities": a.ents,
 		"Item": item, "Fields": ent.Fields, "IsEdit": true, "Options": opts,
+		"LinkGroups": a.resolveLinks(r, ent, item),
 	})
 }
 
 func (a *Admin) handleForm(w http.ResponseWriter, r *http.Request, ent *Entity, item map[string]any, isEdit bool) {
 	opts, _ := a.resolveOptions(r, ent)
 	a.render(w, "form.html", map[string]any{
-		"Title": ent.Label, "Entity": ent, "Entities": a.ents,
+		"Title": ent.Label, "Active": ent.Slug, "Entity": ent, "Entities": a.ents,
 		"Item": item, "Fields": ent.Fields, "IsEdit": isEdit, "Options": opts,
+		"LinkGroups": a.resolveLinks(r, ent, item),
 	})
 }
 
@@ -276,6 +289,251 @@ func (a *Admin) resolveOptions(r *http.Request, ent *Entity) (map[string][]Optio
 	return out, nil
 }
 
+// listLabels maps select values to their display labels so list cells can show
+// "Managua - Centro" instead of an opaque FK id.
+func (a *Admin) listLabels(r *http.Request, ent *Entity) map[string]string {
+	out := map[string]string{}
+	for _, f := range ent.Fields {
+		if f.Type != "select" || f.Options == nil {
+			continue
+		}
+		opts, err := f.Options(r.Context())
+		if err != nil {
+			log.Printf("admin labels %s.%s: %v", ent.Slug, f.Name, err)
+			continue
+		}
+		for _, o := range opts {
+			label := strings.TrimSpace(strings.TrimSuffix(o.Label, " ("+o.Value+")"))
+			out[f.Name+"\x00"+o.Value] = label
+		}
+	}
+	return out
+}
+
+// resolveLinks loads the checkbox choices for an entity form. On a re-rendered
+// form (validation error) the submitted selections win so nothing is lost.
+func (a *Admin) resolveLinks(r *http.Request, ent *Entity, item map[string]any) []LinkGroup {
+	if len(ent.Links) == 0 {
+		return nil
+	}
+	ctx := r.Context()
+	submitted, hasSubmitted := submittedLinks(item)
+
+	var pairs []store.DelegacionTramite
+	if !hasSubmitted {
+		all, err := a.store.DelegacionTramites().List(ctx)
+		if err != nil {
+			log.Printf("admin links list: %v", err)
+		} else {
+			pairs = all
+		}
+	}
+
+	ownerID := fieldVal(item, ent.IDField)
+	groups := make([]LinkGroup, 0, len(ent.Links))
+	for _, l := range ent.Links {
+		opts, err := l.Options(ctx)
+		if err != nil {
+			log.Printf("admin links options %s: %v", ent.Slug, err)
+			continue
+		}
+		selected := map[string]bool{}
+		if hasSubmitted {
+			for _, v := range submitted[l.OtherKey] {
+				selected[v] = true
+			}
+		} else if ownerID != "" {
+			for _, p := range pairs {
+				if pairValue(p, l.OwnerKey) == ownerID {
+					selected[pairValue(p, l.OtherKey)] = true
+				}
+			}
+		}
+		g := LinkGroup{
+			FieldName: "link:" + l.OtherKey,
+			Title:     l.Title,
+			Help:      l.Help,
+			Options:   make([]LinkOption, 0, len(opts)),
+		}
+		for _, o := range opts {
+			isSel := selected[o.Value]
+			if isSel {
+				g.SelectedCount++
+			}
+			g.Options = append(g.Options, LinkOption{
+				Value: o.Value, Label: o.Label, Detail: o.Detail, Selected: isSel,
+			})
+		}
+		groups = append(groups, g)
+	}
+	return groups
+}
+
+// applyLinks diffs the checked options against the join table and persists the
+// change. Runs after the entity itself was saved.
+func (a *Admin) applyLinks(ctx context.Context, ent *Entity, ownerID string, selections map[string][]string) error {
+	if len(ent.Links) == 0 || ownerID == "" {
+		return nil
+	}
+	js := a.store.DelegacionTramites()
+	pairs, err := js.List(ctx)
+	if err != nil {
+		return err
+	}
+	for _, l := range ent.Links {
+		desired := map[string]bool{}
+		for _, v := range selections[l.OtherKey] {
+			desired[v] = true
+		}
+		current := map[string]bool{}
+		for _, p := range pairs {
+			if pairValue(p, l.OwnerKey) != ownerID {
+				continue
+			}
+			other := pairValue(p, l.OtherKey)
+			current[other] = true
+			if !desired[other] {
+				if err := js.Remove(ctx, p.DelegacionID, p.TramiteID); err != nil && !errors.Is(err, store.ErrNotFound) {
+					return err
+				}
+			}
+		}
+		for other := range desired {
+			if current[other] {
+				continue
+			}
+			if err := js.Add(ctx, joinPair(l, ownerID, other)); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// removeLinksForDeleted clears join rows that pointed at a deleted trámite or
+// delegación (Postgres cascades, the in-memory store does not).
+func (a *Admin) removeLinksForDeleted(r *http.Request, ent *Entity, id string) {
+	if id == "" || (ent.Slug != "tramites" && ent.Slug != "delegaciones") {
+		return
+	}
+	js := a.store.DelegacionTramites()
+	pairs, err := js.List(r.Context())
+	if err != nil {
+		log.Printf("admin unlink %s: %v", id, err)
+		return
+	}
+	for _, p := range pairs {
+		if p.DelegacionID != id && p.TramiteID != id {
+			continue
+		}
+		if err := js.Remove(r.Context(), p.DelegacionID, p.TramiteID); err != nil && !errors.Is(err, store.ErrNotFound) {
+			log.Printf("admin unlink %s: %v", id, err)
+		}
+	}
+}
+
+// autoID derives a readable, unique id for a new record: prefix + slug of the
+// main text field ("tram_pasaporte"). Ids are internal: the admin never types
+// or sees them, they only tie links together.
+func (a *Admin) autoID(ctx context.Context, ent *Entity, m map[string]any) string {
+	prefix := ent.IDPrefix
+	if prefix == "" {
+		prefix = ent.Slug
+	}
+	base := slugify(fieldVal(m, ent.IDSource))
+	if base == "" {
+		base = "registro"
+	}
+	if len(base) > 48 {
+		base = strings.Trim(base[:48], "_")
+	}
+	used := map[string]bool{}
+	if rows, err := ent.List(ctx); err == nil {
+		for _, row := range rows {
+			if id, _ := row[ent.IDField].(string); id != "" {
+				used[id] = true
+			}
+		}
+	}
+	id := prefix + "_" + base
+	for n := 2; used[id]; n++ {
+		id = prefix + "_" + base + "_" + strconv.Itoa(n)
+	}
+	return id
+}
+
+var slugReplacer = strings.NewReplacer(
+	"á", "a", "é", "e", "í", "i", "ó", "o", "ú", "u", "ü", "u", "ñ", "n",
+)
+
+// slugify turns "Alcaldía de León" into "alcaldia_de_leon".
+func slugify(s string) string {
+	s = slugReplacer.Replace(strings.ToLower(strings.TrimSpace(s)))
+	var b strings.Builder
+	prevSep := true
+	for _, r := range s {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
+			b.WriteRune(r)
+			prevSep = false
+			continue
+		}
+		if !prevSep {
+			b.WriteByte('_')
+			prevSep = true
+		}
+	}
+	return strings.Trim(b.String(), "_")
+}
+
+// syncEntidad fills tramites.entidad from the assigned delegación when the
+// trámite has exactly one, using the delegación name prefix ("CSE - Delegación
+// León" → "CSE"). The field duplicates the delegación and is kept only for the
+// JSON contract; with zero or several delegaciones the stored value is left
+// untouched.
+func (a *Admin) syncEntidad(ctx context.Context, ent *Entity, m map[string]any) {
+	if ent.Slug != "tramites" {
+		return
+	}
+	sel, _ := m["__links"].(map[string][]string)
+	ids := sel["delegacionId"]
+	if len(ids) != 1 || ids[0] == "" {
+		return
+	}
+	d, err := a.store.Delegaciones().Get(ctx, ids[0])
+	if err != nil {
+		return
+	}
+	name := strings.TrimSpace(strings.SplitN(d.NombreOficina, " - ", 2)[0])
+	if name != "" {
+		m["entidad"] = name
+	}
+}
+
+func submittedLinks(item map[string]any) (map[string][]string, bool) {
+	if item == nil {
+		return nil, false
+	}
+	v, ok := item["__links"].(map[string][]string)
+	return v, ok
+}
+
+func pairValue(p store.DelegacionTramite, key string) string {
+	switch key {
+	case "delegacionId":
+		return p.DelegacionID
+	case "tramiteId":
+		return p.TramiteID
+	}
+	return ""
+}
+
+func joinPair(l Link, ownerID, other string) store.DelegacionTramite {
+	if l.OwnerKey == "delegacionId" {
+		return store.DelegacionTramite{DelegacionID: ownerID, TramiteID: other}
+	}
+	return store.DelegacionTramite{DelegacionID: other, TramiteID: ownerID}
+}
+
 func (a *Admin) handleCreate(w http.ResponseWriter, r *http.Request, ent *Entity) {
 	m, verrs, err := a.parseForm(r, ent)
 	if err != nil {
@@ -283,11 +541,24 @@ func (a *Admin) handleCreate(w http.ResponseWriter, r *http.Request, ent *Entity
 		return
 	}
 	if verrs != "" {
-		a.renderErr(w, ent, m, false, verrs)
+		a.renderErr(w, r, ent, m, false, verrs)
 		return
 	}
+	if !ent.IsJoin && ent.IDField != "" {
+		if id, _ := m[ent.IDField].(string); id == "" {
+			m[ent.IDField] = a.autoID(r.Context(), ent, m)
+		}
+	}
+	a.syncEntidad(r.Context(), ent, m)
+	sel, _ := m["__links"].(map[string][]string)
 	if err := ent.Save(r.Context(), m); err != nil {
-		a.renderErr(w, ent, m, false, "Error al guardar: "+err.Error())
+		a.renderErr(w, r, ent, m, false, "Error al guardar: "+err.Error())
+		return
+	}
+	ownerID, _ := m[ent.IDField].(string)
+	if err := a.applyLinks(r.Context(), ent, ownerID, sel); err != nil {
+		a.notifyChange()
+		http.Redirect(w, r, "/admin/"+ent.Slug+"?error="+url.QueryEscape("Guardado, pero fallaron las asignaciones: "+err.Error()), http.StatusSeeOther)
 		return
 	}
 	a.notifyChange()
@@ -301,11 +572,43 @@ func (a *Admin) handleUpdate(w http.ResponseWriter, r *http.Request, ent *Entity
 		return
 	}
 	if verrs != "" {
-		a.renderErr(w, ent, m, true, verrs)
+		a.renderErr(w, r, ent, m, true, verrs)
 		return
 	}
+	if !ent.IsJoin {
+		if id, _ := m[ent.IDField].(string); id == "" {
+			a.renderErr(w, r, ent, m, true, "No se indicó el registro a editar.")
+			return
+		}
+	}
+	// Hidden fields (kept only for the JSON contract, e.g. tramites.entidad)
+	// may be absent from the posted form; restore the stored value instead of
+	// wiping it on edit.
+	if id, _ := m[ent.IDField].(string); id != "" && !ent.IsJoin {
+		if cur, err := ent.Get(r.Context(), id); err == nil {
+			for _, f := range ent.Fields {
+				if !f.Hidden {
+					continue
+				}
+				if _, ok := m[f.Name]; ok {
+					continue
+				}
+				if v, ok := cur[f.Name]; ok {
+					m[f.Name] = v
+				}
+			}
+		}
+	}
+	sel, _ := m["__links"].(map[string][]string)
+	a.syncEntidad(r.Context(), ent, m)
 	if err := ent.Save(r.Context(), m); err != nil {
-		a.renderErr(w, ent, m, true, "Error al guardar: "+err.Error())
+		a.renderErr(w, r, ent, m, true, "Error al guardar: "+err.Error())
+		return
+	}
+	ownerID, _ := m[ent.IDField].(string)
+	if err := a.applyLinks(r.Context(), ent, ownerID, sel); err != nil {
+		a.notifyChange()
+		http.Redirect(w, r, "/admin/"+ent.Slug+"?error="+url.QueryEscape("Guardado, pero fallaron las asignaciones: "+err.Error()), http.StatusSeeOther)
 		return
 	}
 	a.notifyChange()
@@ -318,9 +621,18 @@ func (a *Admin) handleDelete(w http.ResponseWriter, r *http.Request, ent *Entity
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	if !ent.IsJoin {
+		if id, _ := m[ent.IDField].(string); id == "" {
+			http.Redirect(w, r, "/admin/"+ent.Slug+"?error="+url.QueryEscape("No se indicó el registro a eliminar."), http.StatusSeeOther)
+			return
+		}
+	}
 	if err := ent.Delete(r.Context(), m); err != nil {
 		http.Redirect(w, r, "/admin/"+ent.Slug+"?error="+url.QueryEscape("No se pudo eliminar: "+err.Error()), http.StatusSeeOther)
 		return
+	}
+	if id, _ := m[ent.IDField].(string); id != "" {
+		a.removeLinksForDeleted(r, ent, id)
 	}
 	a.notifyChange()
 	http.Redirect(w, r, "/admin/"+ent.Slug+"?flash=Eliminado", http.StatusSeeOther)
@@ -339,6 +651,13 @@ func (a *Admin) parseForm(r *http.Request, ent *Entity) (map[string]any, string,
 		return nil, "", err
 	}
 	m := map[string]any{}
+	if len(ent.Links) > 0 {
+		sel := map[string][]string{}
+		for _, l := range ent.Links {
+			sel[l.OtherKey] = append([]string(nil), r.Form["link:"+l.OtherKey]...)
+		}
+		m["__links"] = sel
+	}
 	for _, f := range ent.Fields {
 		raw := r.FormValue(f.Name)
 		switch f.Type {
@@ -381,17 +700,13 @@ func (a *Admin) parseForm(r *http.Request, ent *Entity) (map[string]any, string,
 			m[f.Name] = raw
 		}
 	}
-	// for edit/update the id must be present even for joins
+	// Join tables use a composite key instead of an id.
 	if ent.IsJoin {
 		if _, ok := m["delegacionId"]; !ok {
 			return m, "Campo requerido: Delegación", nil
 		}
 		if _, ok := m["tramiteId"]; !ok {
 			return m, "Campo requerido: Trámite", nil
-		}
-	} else if ent.IDField != "" {
-		if v, ok := m[ent.IDField].(string); !ok || v == "" {
-			return m, "Campo requerido: ID", nil
 		}
 	}
 	return m, "", nil
@@ -406,16 +721,20 @@ func (a *Admin) render(w http.ResponseWriter, name string, data map[string]any) 
 	if _, ok := data["Entities"]; !ok {
 		data["Entities"] = a.ents
 	}
+	if _, ok := data["Active"]; !ok {
+		data["Active"] = ""
+	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := a.tmpl.ExecuteTemplate(w, name, data); err != nil {
 		log.Printf("admin render %s: %v", name, err)
 	}
 }
 
-func (a *Admin) renderErr(w http.ResponseWriter, ent *Entity, item map[string]any, isEdit bool, msg string) {
+func (a *Admin) renderErr(w http.ResponseWriter, r *http.Request, ent *Entity, item map[string]any, isEdit bool, msg string) {
 	a.render(w, "form.html", map[string]any{
-		"Title": ent.Label, "Entity": ent, "Entities": a.ents,
+		"Title": ent.Label, "Active": ent.Slug, "Entity": ent, "Entities": a.ents,
 		"Item": item, "Fields": ent.Fields, "IsEdit": isEdit, "Err": msg,
+		"LinkGroups": a.resolveLinks(r, ent, item),
 	})
 }
 
