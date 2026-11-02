@@ -29,7 +29,7 @@ set "RUNENV="
 if exist .env set "RUNENV=--env-file .env"
 
 echo Starting new container...
-docker run -d --name %CONTAINER% --restart unless-stopped -p 80:80 %RUNENV% %IMAGE% || goto :fail
+docker run -d --name %CONTAINER% --restart no -p 80:80 %RUNENV% %IMAGE% || goto :fail
 
 echo.
 echo Done.
